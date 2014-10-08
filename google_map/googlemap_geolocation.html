@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Geolocation</title>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta charset="utf-8">
+		<style>
+			html, body, #map-canvas {
+				height: 100%;
+				margin: 0px;
+				padding: 0px
+			}
+		</style>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+
+		<script>
+			// Note: This example requires that you consent to location sharing when
+			// prompted by your browser. If you see a blank space instead of the map, this
+			// is probably because you have denied permission for location sharing.
+
+			var map;
+
+			function initialize() {
+
+				var mapOptions = {
+					scaleControl : true,
+					// Pune - 18.5203, 73.8567
+					// India - 20.593684, 78.96288
+					center : new google.maps.LatLng(20.593684, 78.96288),
+					zoom : 2
+				};
+
+				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+				/*// Try HTML5 geolocation
+				 if (navigator.geolocation) {
+				 navigator.geolocation.getCurrentPosition(function(position) {
+				 var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+				 var infowindow = new google.maps.InfoWindow({
+				 map : map,
+				 position : pos,
+				 content : 'Location found using HTML5.'
+				 });
+
+				 map.setCenter(pos);
+				 }, function() {
+				 handleNoGeolocation(true);
+				 });
+				 } else {
+				 // Browser doesn't support Geolocation
+				 handleNoGeolocation(false);
+				 }*/
+
+				var marker = new google.maps.Marker({
+					map : map,
+					position : map.getCenter(),
+				});
+
+				var infowindow = new google.maps.InfoWindow();
+
+				infowindow.setContent('<b>Pune, India</b>');
+				google.maps.event.addListener(marker, 'click', function() {
+					infowindow.open(map, marker);
+				});
+
+				// var address = document.getElementById("address").value;
+				var address = "Pune, India";
+				var geocoder = new google.maps.Geocoder();
+
+				geocoder.geocode({
+					'address' : address
+				}, function(results, status) {
+					var location = results[0].geometry.location;
+					alert(location.lat() + '' + location.lng());
+				});
+
+			}
+
+			function handleNoGeolocation(errorFlag) {
+				if (errorFlag) {
+					var content = 'Error: The Geolocation service failed.';
+				} else {
+					var content = 'Error: Your browser doesn\'t support geolocation.';
+				}
+
+				var options = {
+					scaleControl : true,
+					map : map,
+					position : new google.maps.LatLng(60, 105),
+					// center: new google.maps.LatLng(30.064742, 31.249509),
+					content : content
+					// zoom : 6;
+				};
+
+				var infowindow = new google.maps.InfoWindow(options);
+				map.setCenter(options.position);
+			}
+
+			google.maps.event.addDomListener(window, 'load', initialize);
+
+		</script>
+	</head>
+	<body>
+		<div id="map-canvas"></div>
+	</body>
+</html>
+

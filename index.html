@@ -1,0 +1,335 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    	<meta charset="utf-8">
+    	
+		<style type="text/css">
+			html, body, #map-canvas {
+				height: 100%;
+				margin: 10px;
+				padding: 10px
+			}
+
+			.showorhide {
+				display: none;
+			}
+		</style>
+		
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+		<script type="text/javascript" src="countrynames-master/index.js"></script>
+		
+		<script type="text/javascript" src="http://platform.linkedin.com/in.js">
+api_key: 752f7e023f5cet
+authorize: true
+credentials_cookie: true
+credentials_cookie_crc: true
+onLoad: onLinkedInLoad
+scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_groups r_fullprofile rw_nus r_contactinfo
+Secret_Key:8hEIlinuKm6NElKu
+OAuth_User_Token:d85dac7f-2152-464c-a4cd-fce0090c2643
+OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
+		</script>
+	
+	
+	<!-- Google Map intialization-->
+		<script>
+			// Note: This example requires that you consent to location sharing when
+			// prompted by your browser. If you see a blank space instead of the map, this
+			// is probably because you have denied permission for location sharing.
+
+			var map;
+
+			var mFinalData = [];
+			var mArr = [];
+
+			function initialize(final_data, arr) {
+
+				mFinalData = final_data;
+				mArr = arr;
+
+				var mapOptions = {
+					scaleControl : true,
+					// Pune - 18.5203, 73.8567
+					// India - 20.593684, 78.96288
+					center : new google.maps.LatLng(20.593684, 78.96288),
+					zoom : 2
+				};
+
+				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+				for (var i = 0; i < mFinalData.length; i++) {
+
+					var mUsersArray_CountryWise = [];
+					mUsersArray_CountryWise = mFinalData[mArr[i]];
+					
+					var mCountryName = mArr[i].toUpperCase();
+					var mFullCountryName = getCountryName(mCountryName);
+					
+					console.log("Total Connections of " + mFullCountryName + " => " + mUsersArray_CountryWise.length);
+
+					var address = mFullCountryName;
+					var geocoder = new google.maps.Geocoder();
+
+					geocoder.geocode({
+						'address' : address
+					}, function(results, status) {
+
+						if (status == google.maps.GeocoderStatus.OK) {
+
+							var mFullCountryName = getCountryName((results[0].address_components[0].short_name).toUpperCase());
+
+							console.log(mFullCountryName + " mLattitude : " + results[0].geometry.location.lat() + 
+										" mLongitude : " + results[0].geometry.location.lng());
+							
+							var position = new google.maps.LatLng(results[0].geometry.location.lat(), 
+										results[0].geometry.location.lng());
+							
+							var marker = new google.maps.Marker({
+								map : map,
+								position : position,
+		
+							});
+
+							var infowindow = new google.maps.InfoWindow();
+		
+								var mTempUsersArray_CountryWise = mFinalData[(results[0].address_components[0].short_name).toLowerCase()];
+		
+								infowindow.setContent('<b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b>');
+								google.maps.event.addListener(marker, 'click', function() {
+									infowindow.open(map, marker);
+								});
+								
+							} else
+								console.log("Geocode failed, status: " + status);
+					});
+					
+				}
+
+			}
+
+			// google.maps.event.addDomListener(window, 'load', initialize);
+
+		</script>
+		<!-- End of Google Map intialization-->
+
+	
+		<script type="text/javascript" src="js/country_names.js"></script>
+	
+		<!-- Linkedin Stuff -->
+		<script type="text/javascript">
+			function onLinkedInLoad() {
+				IN.Event.on(IN, "auth", onLinkedInAuth);
+				var div = document.getElementByClass("showorhide");
+				div.style.visibility = "visible";
+			}
+
+			function onLinkedInAuth() {
+				// IN.API.Profile("me").result(ShowProfileData);
+
+				IN.API.Profile("me")
+				.fields("firstName", "lastName", "industry", "location:(name)", "picture-url", "headline", "summary", "num-connections", "public-profile-url", "distance", "positions", "email-address", "educations", "date-of-birth", "threeCurrentPositions")
+				.result(displayProfiles)
+				.error(displayProfilesErrors);
+			}
+
+			//var foo = null;
+
+			function displayProfiles(profiles) {
+				document.getElementById('div1').style.display = 'block';
+				member = profiles.values[0];
+
+				document.getElementById("lblName").innerHTML = member.firstName + " " + member.lastName + "<br/> Location is " + member.location.name;
+				document.getElementById("imgProfile").src = member.pictureUrl;
+				document.getElementById("lblEmail").innerHTML = member.emailAddress;
+				document.getElementById("lblProfile").innerHTML = member.publicProfileUrl;
+				document.getElementById("lblconnection").innerHTML = member.numConnections;
+				foo = member.numConnections;
+			}
+
+			function onLinkedInLogout() {
+				//setConnections({}, {total:0});
+				try {
+					IN.User.logout();
+				} catch (err) {
+					console.log(err);
+				}
+				setTimeout("goToHome()", 10000);
+			}
+
+			function goToHome() {
+				location.href = "index.html";
+			}
+
+			function onLinkedInconnection() {
+				// here, we pass the fields as individual string parameters
+				IN.API.Connections("me")
+				.fields("id", "firstName", "lastName", "pictureUrl", "publicProfileUrl", "threeCurrentPositions", "location:(country:(code))")
+				//.params({"count" : foo})
+				.result(function(result, metadata) {
+					// var data = JSON.parse(JSON.stringify(result));
+					// console.log(JSON.stringify(result));
+					// console.log(data["values"][0]["firstName"]);
+            		// console.log(data["values"][0]["lastName"]);            		
+					
+					//console.log("Connection Results : "+data);
+					setConnections(result.values, metadata);
+				});
+
+			}
+
+			function arraySearch(arr, val) {
+				for (var i = 0; i < arr.length; i++) {
+					if (arr[i] == val) {
+						return i;
+					} else {
+						return false;
+					}
+				}
+			}
+
+			function setConnections(connections, metadata) {
+				var arr = [];
+								
+				for (id in connections) {
+					// console.log(connections['id']);
+					
+					if (connections[id].id == 'private' || connections[id].location.country.code == 'private' 
+									|| connections[id].location.country.code == 'oo')
+						continue;
+
+					if (arr.indexOf(connections[id].location.country.code) == -1) {
+						arr.push(connections[id].location.country.code);
+					}
+				}
+				
+				var final_data = [];
+				for ( index = 0; index < arr.length; ++index) {
+					
+					var user_array = [];
+					for (id in connections) {
+
+						if (connections[id].id == 'private' || connections[id].location.country.code == 'private' 
+									|| connections[id].location.country.code == 'oo')
+							continue;						
+						
+						if (connections[id].location.country.code == arr[index]) {
+							
+							var temp = {};
+							var temp_array = [];
+							
+							var user_info = {
+								fname : connections[id].firstName,
+								lname : connections[id].lastName,
+								id : connections[id].id,
+								location : connections[id].location.country.code,
+								profile_url : connections[id].publicProfileUrl
+							};							
+
+							// temp_array.push(user_info);
+							// temp = temp_array;
+							user_array.push(user_info);
+						}
+
+					}
+					
+					// add users data..
+					final_data.push(user_array);
+				}
+				
+				for ( index = 0; index < arr.length; ++index) {
+					for ( i = 0; i < final_data.length; ++i) {
+						if (index == i) {
+							
+							//final_data["in"] = users array having country is India.. Noted 
+							final_data[arr[index]] = final_data[i];
+							
+							// free up memory
+							delete final_data[i];
+						}
+
+					}
+				}
+				
+				console.log(final_data);
+				console.log(final_data.length+" "+arr.length);
+				
+				for ( index = 0; index < arr.length; ++index) {
+					console.log("Country : "+arr[index]);
+				}
+				
+				initialize(final_data, arr);				
+			}			
+
+		</script>
+		<!-- End of Linkedin Stuff -->
+		
+		
+				
+		
+		<title>VSPLC Linkedin Prototype</title>
+	</head>
+	<body>
+		<p>
+			This example demonstrates how to retrieve a user's connections.  It also uses the LinkedIn auth events (load, login,
+			<input type="button" name="search1" value="Logout" onclick="onLinkedInLogout()">
+			) to control behavior.
+		</p>
+
+		<script type="text/javascript">
+			var assert = require('assert'), countrynames = require('./');
+
+			assert.equal(countrynames.getCode('French Guiana'), 'GF');
+			assert.equal(countrynames.getName('BF'), 'BURKINA FASO');
+			assert.equal(countrynames.getCode('Iran'), countrynames.getCode('IRAN, ISLAMIC REPUBLIC OF'));
+			assert.equal(countrynames.getCode(countrynames.getName('IO')), 'IO');
+			assert.ok(countrynames.getAllCodes() instanceof Array);
+			assert.ok(countrynames.getAllNames() instanceof Array);
+
+			console.log('Passed successfully.');
+		</script>
+
+		<script type="IN/Login"></script>
+		<input type="button" name="search1" value="Search LinkedIn!" onclick="search()">
+		<input type="button" name="con" value="Connection" onclick="onLinkedInconnection()">
+
+		<div id="div1" style="display:none">
+			<table>
+				<b>Get Linkedin LoggedIn User Details</b>
+				<tr>
+					<td>Name:</td>
+					<td><label id="lblName"></label></td>
+				</tr>
+				<tr>
+					<td>Email:</td>
+					<td><label id="lblEmail"></label></td>
+				</tr>
+				<tr>
+					<td>Profile Url:</td>
+					<td><label id="lblProfile"></label></td>
+				</tr>
+				<tr>
+					<td>Profile Image:</td>
+					<td><img id="imgProfile"></label></td>
+				</tr>
+				<tr>
+					<td>Connection:</td>
+					<td><label id="lblconnection"></label></td>
+				</tr>
+			</table>
+		</div>
+
+		<div id="connectionsDiv">
+			<p>
+				Current User's Connections:
+			</p>
+			<div id="connectionsdata"></div>
+			<div id="connections"></div>
+		</div>
+		
+		<div id="map-canvas"></div>
+
+	</body>
+</html>
