@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>jQuery mobile with Google maps - Google maps jQuery plugin</title>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.css" />
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.js"></script>
+		<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3&sensor=false&language=en"></script>
+		
+		<script type="text/javascript">
+			var cityList = [['Chicago', 41.850033, -87.6500523, 1], ['Illinois', 40.797177, -89.406738, 2]];
+
+			var demoCenter = new google.maps.LatLng(41, -87);
+
+			var map;
+			function initialize() {
+				map = new google.maps.Map(document.getElementById('map_canvas'), {
+					zoom : 7,
+					center : demoCenter,
+					mapTypeId : google.maps.MapTypeId.ROADMAP
+				});
+				addMarkers();
+			}
+
+			// var boxText1 = document.createElement("div");
+			// boxText1.id = "boxText1";
+			// boxText1.className = "labelText1";
+			// boxText1.innerHTML = "title1";
+			//this is created earlier
+			var boxList = [];
+
+			function addMarkers() {
+				var marker, i;
+				var infowindow = new google.maps.InfoWindow({
+					disableAutoPan : true,
+					isHidden : false,
+					pixelOffset : new google.maps.Size(-10, -10),
+					closeBoxURL : "",
+					pane : "mapPane",
+					enableEventPropagation : true
+				});
+				
+				for (var i = 0; i < cityList.length; i++) {
+					marker = new google.maps.Marker({
+						position : new google.maps.LatLng(cityList[i][1], cityList[i][2]),
+						map : map,
+						id : i,
+						title : cityList[i][0]
+					});
+
+					var boxText = document.createElement("div");
+					boxText.id = i;
+					boxText.className = "labelText" + i;
+					boxText.innerHTML = cityList[i][0];
+					boxList.push(boxText);
+
+					google.maps.event.addListener(marker, 'click', (function(marker, i) {
+						var contentString = '<div id="infoWindow">' + '<div id="bodyContent">' + '<p>' + "This location is:<br>" + marker.title + '</p>' + '</div>' + '</div>';
+
+						return function() {
+							infowindow.setContent(boxList[this.id]);
+							infowindow.open(map, marker);
+						};
+					})(marker, i));
+					//end add marker listener
+
+					google.maps.event.addDomListener(boxList[i], 'click', (function(marker, i) {
+						return function() {
+							alert('clicked ' + cityList[i][0])
+						}
+					})(marker, i));
+					
+				} //endfor
+			}//end function
+
+		</script>
+	</head>
+	<body onload="initialize()">
+		<div id="basic-map" data-role="page">
+			<div data-role="header">
+				<h1><a data-ajax="false" href="/">jQuery mobile with Google maps v3</a> examples</h1>
+				<a data-rel="back">Back</a>
+			</div>
+			<div data-role="content">
+				<div class="ui-bar-c ui-corner-all ui-shadow" style="padding:1em;">
+					<div id="map_canvas" style="height:350px;"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

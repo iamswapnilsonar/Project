@@ -275,22 +275,24 @@ function getLocationCoordinates(address) {
 
 	geocoder.geocode({
 		'address' : address
-	}, function(results, status) {
+	}, function(results, callback, status) {
 
 		if (status == google.maps.GeocoderStatus.OK) {
 
 			mLattitude = results[0].geometry.location.lat();
 			mLongitude = results[0].geometry.location.lng();
 
-			console.log(mFullCountryName + " mLattitude : " + mLattitude + " mLongitude : " + mLongitude);
+			console.log(address + " mLattitude : " + mLattitude + " mLongitude : " + mLongitude);
 			position = new google.maps.LatLng(mLattitude, mLongitude);
-			return position;
 			
 		} else{
 			console.log("Geocode failed, status: " + status);
-			return position;
+			// console.log(" Position : " + position);
+			// return position;
 		}
 			
 	});
 
+	console.log("Position : " + position);
+	return position;
 }
