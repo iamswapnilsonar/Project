@@ -51,6 +51,9 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 			var cityList = [['Pune', 18.5204303, 73.8567437, 1], ['Mumbai', 19.0759837, 72.87765589999999, 2], ['Delhi', 28.635308, 77.22496, 3], ['Kolkata', 22.572646, 88.36389500000001, 4], ['Chennai', 13.0597049, 80.2252278, 5]];
 
+			var position = getLocationCoordinates("Pune,India");
+			console.log("Position : "+ position);	
+
 			function initialize(connections, total_countrywise_connections, country_name_arr) {
 
 				mFinalData = total_countrywise_connections;
@@ -66,10 +69,7 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-				
-
 				// getCitywiseConnctions("Delhi", mFinalData["in"]);		
-				
 				console.log("total_countrywise_connections : "+total_countrywise_connections.length);
 				
 				for (var i = 0; i < total_countrywise_connections.length; i++) {
@@ -83,7 +83,7 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 					console.log(" "+mFullCountryName+" is total cities is : "+total_cities[m_country_name_arr[i]].length);
 
 					// console.log("Total Connections of " + mFullCountryName);
-
+					
 					var address = mFullCountryName;
 					var geocoder = new google.maps.Geocoder();
 
@@ -117,7 +117,6 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 							google.maps.event.addDomListener(infowindow, 'domready', function() {
 								$('#test_in').click(function() {
-									// alert("Hello World");
 
 									map.setZoom(4);
 									// This will trigger a zoom_changed on the map

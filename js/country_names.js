@@ -275,7 +275,7 @@ function getLocationCoordinates(address) {
 
 	geocoder.geocode({
 		'address' : address
-	}, function(results, callback, status) {
+	}, function(results, status) {
 
 		if (status == google.maps.GeocoderStatus.OK) {
 
