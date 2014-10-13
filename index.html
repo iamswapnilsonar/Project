@@ -17,10 +17,12 @@
 				display: none;
 			}
 		</style>
+		
 		<script src="js/jquery-1.4.1.min.js" type="text/javascript"></script>
 		<script src="js/jquery-1.9.1.js" type="text/javascript"></script>
+		
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
-		<script type="text/javascript" src="countrynames-master/index.js"></script>
+		<script type="text/javascript" src="js/country_names.js"></script>
 
 		<script type="text/javascript" src="http://platform.linkedin.com/in.js">
 api_key: 752f7e023f5cet
@@ -43,16 +45,16 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 			var map;
 
 			var mFinalData = [];
-			var mArr = [];
+			var m_country_name_arr = [];
 
 			var boxList = [];
 
 			var cityList = [['Pune', 18.5204303, 73.8567437, 1], ['Mumbai', 19.0759837, 72.87765589999999, 2], ['Delhi', 28.635308, 77.22496, 3], ['Kolkata', 22.572646, 88.36389500000001, 4], ['Chennai', 13.0597049, 80.2252278, 5]];
 
-			function initialize(final_data, arr) {
+			function initialize(connections, total_countrywise_connections, country_name_arr) {
 
-				mFinalData = final_data;
-				mArr = arr;
+				mFinalData = total_countrywise_connections;
+				m_country_name_arr = country_name_arr;
 
 				var mapOptions = {
 					scaleControl : true,
@@ -64,15 +66,23 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-				for (var i = 0; i < final_data.length; i++) {
+				
 
-					var mUsersArray_CountryWise = [];
-					mUsersArray_CountryWise = mFinalData[mArr[i]];
-
-					var mCountryName = mArr[i].toUpperCase();
+				// getCitywiseConnctions("Delhi", mFinalData["in"]);		
+				
+				console.log("total_countrywise_connections : "+total_countrywise_connections.length);
+				
+				for (var i = 0; i < total_countrywise_connections.length; i++) {
+				
+					var mCountryName = m_country_name_arr[i].toUpperCase();
 					var mFullCountryName = getCountryName(mCountryName);
 
-					console.log("Total Connections of " + mFullCountryName + " => " + mUsersArray_CountryWise.length);
+					
+					var total_cities = [];
+					total_cities = getCitiesName(connections, country_name_arr);
+					console.log(" "+mFullCountryName+" is total cities is : "+total_cities[m_country_name_arr[i]].length);
+
+					// console.log("Total Connections of " + mFullCountryName);
 
 					var address = mFullCountryName;
 					var geocoder = new google.maps.Geocoder();
@@ -85,7 +95,7 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 							var mFullCountryName = getCountryName((results[0].address_components[0].short_name).toUpperCase());
 
-							console.log(mFullCountryName + " mLattitude : " + results[0].geometry.location.lat() + " mLongitude : " + results[0].geometry.location.lng());
+							// console.log(mFullCountryName + " mLattitude : " + results[0].geometry.location.lat() + " mLongitude : " + results[0].geometry.location.lng());
 
 							var position = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
 
@@ -186,8 +196,84 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				}
 
 			}
+			
+			function getCitiesName(connections, country_name_arr) {
 
-			// google.maps.event.addDomListener(window, 'load', initialize);
+	var final_city_array = [];
+
+	for ( j = 0; j < country_name_arr.length; ++j) {
+
+		var city_list = [];
+
+		for (id in connections) {
+
+			if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
+				continue;
+
+			if (connections[id].location.country.code == country_name_arr[j]) {
+
+				//Remove the area word from the location name
+				var str = connections[id].location.name, re = /Area/g, result = [], match, last_idx = 0;
+
+				while ( match = re.exec(str)) {
+					result.push(str.slice(last_idx, re.lastIndex - match[0].length), match[0]);
+					last_idx = re.lastIndex;
+				}
+				result.push(str.slice(last_idx));
+				//End for Remove the area word from the location name
+
+				//Remove comma from the string and separate city
+				str1 = result[0];
+				result2 = str1.split(",");
+				//End Remove comma from the string and separate city
+
+				// console.log(result2[0]);
+				if (city_list.indexOf(result2[0]) == -1) {
+					city_list.push(result2[0]);
+				}
+			}
+		}
+		final_city_array.push(city_list);
+	}
+
+	for ( index1 = 0; index1 < country_name_arr.length; ++index1) {
+		for ( k = 0; k < final_city_array.length; ++k) {
+			if (index1 == k) {
+				final_city_array[country_name_arr[index1]] = final_city_array[k];
+				delete final_city_array[k];
+			}
+
+		}
+	}
+
+	// console.log(final_city_array);
+	return final_city_array;
+}
+
+		
+function getCitywiseConnctions(city_name, total_country_connections) {
+
+	var member;
+	var members_arr = [];
+
+	for (var i = 0; i < total_country_connections.length; i++) {
+		member = total_country_connections[i];
+
+		// members_arr.push(member);
+		// console.log("Name : "+member.fname+" "+member.lname+" : "+member.location_name);
+
+		var position = member.location_name.search(city_name);
+		if (position != -1) {
+			members_arr.push(member);
+			console.log("Name : " + member.fname + " " + member.lname + " : " + member.location_name);
+		} else {
+			// NOP
+		}
+
+	};
+	console.log("members_arr : " + members_arr.length);
+	return members_arr;
+}
 
 		</script>
 		<!-- End of Google Map intialization-->
@@ -238,7 +324,7 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 			function onLinkedInconnection() {
 				// here, we pass the fields as individual string parameters
-				IN.API.Connections("me").fields("id", "firstName", "lastName", "pictureUrl", "publicProfileUrl", "threeCurrentPositions", "location:(country:(code))")
+				IN.API.Connections("me").fields("id", "firstName", "lastName", "pictureUrl", "publicProfileUrl", "threeCurrentPositions", "location:(name,country:(code))")
 				//.params({"count" : foo})
 				.result(function(result, metadata) {
 					// var data = JSON.parse(JSON.stringify(result));
@@ -263,29 +349,30 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 			}
 
 			function setConnections(connections, metadata) {
-				var arr = [];
+				
+				var country_name_arr = [];
 
 				for (id in connections) {
-					// console.log(connections['id']);
 
 					if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
 						continue;
 
-					if (arr.indexOf(connections[id].location.country.code) == -1) {
-						arr.push(connections[id].location.country.code);
+					if (country_name_arr.indexOf(connections[id].location.country.code) == -1) {
+						country_name_arr.push(connections[id].location.country.code);
 					}
 				}
 
-				var final_data = [];
-				for ( index = 0; index < arr.length; ++index) {
+				var total_countrywise_connections = [];
+				for ( index = 0; index < country_name_arr.length; ++index) {
 
 					var user_array = [];
 					for (id in connections) {
 
-						if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
+						if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || 
+								connections[id].location.country.code == 'oo')
 							continue;
 
-						if (connections[id].location.country.code == arr[index]) {
+						if (connections[id].location.country.code == country_name_arr[index]) {
 
 							var temp = {};
 							var temp_array = [];
@@ -294,44 +381,46 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 								fname : connections[id].firstName,
 								lname : connections[id].lastName,
 								id : connections[id].id,
+								location_name: connections[id].location.name,
 								location : connections[id].location.country.code,
 								profile_url : connections[id].publicProfileUrl
 							};
-
-							// temp_array.push(user_info);
-							// temp = temp_array;
+							
 							user_array.push(user_info);
 						}
 
 					}
 
 					// add users data..
-					final_data.push(user_array);
+					total_countrywise_connections.push(user_array);
 				}
 
-				for ( index = 0; index < arr.length; ++index) {
-					for ( i = 0; i < final_data.length; ++i) {
+				for ( index = 0; index < country_name_arr.length; ++index) {
+					for ( i = 0; i < total_countrywise_connections.length; ++i) {
 						if (index == i) {
 
-							//final_data["in"] = users array having country is India.. Noted
-							final_data[arr[index]] = final_data[i];
+							//total_countrywise_connections["in"] = users array having country is India.. Noted
+							total_countrywise_connections[country_name_arr[index]] = total_countrywise_connections[i];
 
 							// free up memory
-							delete final_data[i];
+							delete total_countrywise_connections[i];
 						}
 
 					}
 				}
 
-				console.log(final_data);
-				console.log(final_data.length + " " + arr.length);
+				// console.log(total_countrywise_connections);
+				// console.log(total_countrywise_connections.length + " " + country_name_arr.length);
 
-				for ( index = 0; index < arr.length; ++index) {
-					console.log("Country : " + arr[index]);
+				for ( index = 0; index < country_name_arr.length; ++index) {
+					// console.log("Country : " + country_name_arr[index]);
 				}
 
-				initialize(final_data, arr);
-			}
+				initialize(connections, total_countrywise_connections, country_name_arr);
+				
+				// // get cities from country data 
+				// getCitiesName(connections, country_name_arr);
+			}			
 
 		</script>
 		<!-- End of Linkedin Stuff -->
