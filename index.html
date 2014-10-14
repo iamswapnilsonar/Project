@@ -17,11 +17,12 @@
 				display: none;
 			}
 		</style>
-		
-		<script src="js/jquery-1.4.1.min.js" type="text/javascript"></script>
-		<script src="js/jquery-1.9.1.js" type="text/javascript"></script>
-		
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+
+		<!--<script src="js/jquery-1.4.1.min.js" type="text/javascript"></script>
+		<script src="js/jquery-1.9.1.js" type="text/javascript"></script>-->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+
+		<script src="http://maps.googleapis.com/maps/api/js?v=3.exp"></script>
 		<script type="text/javascript" src="js/country_names.js"></script>
 
 		<script type="text/javascript" src="http://platform.linkedin.com/in.js">
@@ -51,13 +52,16 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 			var cityList = [['Pune', 18.5204303, 73.8567437, 1], ['Mumbai', 19.0759837, 72.87765589999999, 2], ['Delhi', 28.635308, 77.22496, 3], ['Kolkata', 22.572646, 88.36389500000001, 4], ['Chennai', 13.0597049, 80.2252278, 5]];
 
-			var position = getLocationCoordinates("Pune,India");
-			console.log("Position : "+ position);	
+			var markers = [];
+			var infowindows = [];
 
 			function initialize(connections, total_countrywise_connections, country_name_arr) {
 
 				mFinalData = total_countrywise_connections;
 				m_country_name_arr = country_name_arr;
+
+				// var position = getLocationCoordinate("Delhi,India");
+				// console.log("Position : " + position.lat + " " + position.lng);
 
 				var mapOptions = {
 					scaleControl : true,
@@ -69,210 +73,377 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-				// getCitywiseConnctions("Delhi", mFinalData["in"]);		
-				console.log("total_countrywise_connections : "+total_countrywise_connections.length);
-				
+				// getCitywiseConnctions("Delhi", mFinalData["in"]);
+				console.log("total_countrywise_connections : " + total_countrywise_connections.length);
+
+				var locations = [];
+
+				// we currently fixed it to 10 countries instead of "total_countrywise_connections"
 				for (var i = 0; i < total_countrywise_connections.length; i++) {
-				
+
 					var mCountryName = m_country_name_arr[i].toUpperCase();
 					var mFullCountryName = getCountryName(mCountryName);
 
-					
 					var total_cities = [];
 					total_cities = getCitiesName(connections, country_name_arr);
-					console.log(" "+mFullCountryName+" is total cities is : "+total_cities[m_country_name_arr[i]].length);
+					console.log(" " + mFullCountryName + " is total cities is : " + total_cities[m_country_name_arr[i]].length);
 
 					// console.log("Total Connections of " + mFullCountryName);
-					
+
 					var address = mFullCountryName;
-					var geocoder = new google.maps.Geocoder();
 
-					geocoder.geocode({
-						'address' : address
-					}, function(results, status) {
+					var position = getLocationCoordinate(address);
 
-						if (status == google.maps.GeocoderStatus.OK) {
+					if (position != null) {
+						console.log("Position : " + position.lat + " " + position.lng);
 
-							var mFullCountryName = getCountryName((results[0].address_components[0].short_name).toUpperCase());
+						var location = {
+							location_name : m_country_name_arr[i],
+							latitude : position.lat,
+							longitude : position.lng,
+						};
 
-							// console.log(mFullCountryName + " mLattitude : " + results[0].geometry.location.lat() + " mLongitude : " + results[0].geometry.location.lng());
+						locations.push(location);
 
-							var position = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+						// markers[i] = new google.maps.Marker({
+							// map : map,
+							// position : position,
+						// });
 
-							var marker = new google.maps.Marker({
-								map : map,
-								position : position,
+						// infowindows[i] = new google.maps.InfoWindow();
 
-							});
+						// var mTempUsersArray_CountryWise = mFinalData[m_country_name_arr[i]];
 
-							var infowindow = new google.maps.InfoWindow();
+						// infowindows[i].setContent('<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>');
+// 
+						// google.maps.event.addListener(markers[i], 'click', function() {
+							// infowindow.open(map, markers[i]);
+						// });
 
-							var mTempUsersArray_CountryWise = mFinalData[(results[0].address_components[0].short_name).toLowerCase()];
+						/*google.maps.event.addDomListener(infowindow, 'domready', function() {
+						 $('#test_in').click(function() {
 
-							infowindow.setContent('<a href="#" id="test_' + (results[0].address_components[0].short_name).toLowerCase() + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>');
+						 map.setZoom(4);
+						 // This will trigger a zoom_changed on the map
+						 map.setCenter(new google.maps.LatLng(20.593684, 78.96288));
 
-							google.maps.event.addListener(marker, 'click', function() {
-								infowindow.open(map, marker);
-							});
+						 var marker, i;
 
-							google.maps.event.addDomListener(infowindow, 'domready', function() {
-								$('#test_in').click(function() {
+						 var infowindow = new google.maps.InfoWindow();
 
-									map.setZoom(4);
-									// This will trigger a zoom_changed on the map
-									map.setCenter(new google.maps.LatLng(20.593684, 78.96288));
+						 for (var i = 0; i < cityList.length; i++) {
+						 marker = new google.maps.Marker({
+						 position : new google.maps.LatLng(cityList[i][1], cityList[i][2]),
+						 map : map,
+						 id : i,
+						 title : cityList[i][0]
+						 });
 
-									/*console.log("City List : "+cityList.length);
+						 var boxText = document.createElement("div");
+						 boxText.id = i;
+						 boxText.className = "labelText" + i;
+						 boxText.innerHTML = cityList[i][0];
+						 boxList.push(boxText);
 
-									 var position = new google.maps.LatLng(18.463056, 74.57888899999999);
+						 google.maps.event.addListener(marker, 'click', (function(marker, i) {
+						 var contentString = '<div id="infoWindow">' + '<div id="bodyContent">' + '<p>' + "This location is:<br>" + marker.title + '</p>' + '</div>' + '</div>';
 
-									 var marker = new google.maps.Marker({
-									 map : map,
-									 position : position,
+						 return function() {
+						 infowindow.setContent(boxList[this.id]);
+						 infowindow.open(map, marker);
+						 };
+						 })(marker, i));
+						 //end add marker listener
 
-									 });
+						 google.maps.event.addDomListener(boxList[i], 'click', (function(marker, i) {
+						 return function() {
+						 alert('clicked ' + cityList[i][0])
+						 }
+						 })(marker, i));
 
-									 var infowindow = new google.maps.InfoWindow();
+						 } //endfor
 
-									 infowindow.setContent('<b> Daund, Pune </b>');
-									 google.maps.event.addListener(marker, 'click', function() {
-									 infowindow.open(map, marker);
-									 });*/
+						 });
 
-									var marker, i;
-									/*var infowindow = new google.maps.InfoWindow({
-									 disableAutoPan : true,
-									 isHidden : false,
-									 pixelOffset : new google.maps.Size(-10, -10),
-									 closeBoxURL : "",
-									 pane : "mapPane",
-									 enableEventPropagation : true
-									 });*/
+						 });*/
 
-									var infowindow = new google.maps.InfoWindow();
+						console.log("Locations " + locations.length);
 
-									for (var i = 0; i < cityList.length; i++) {
-										marker = new google.maps.Marker({
-											position : new google.maps.LatLng(cityList[i][1], cityList[i][2]),
-											map : map,
-											id : i,
-											title : cityList[i][0]
-										});
+					} else {
+						console.log("Geocode failed");
+					};
 
-										var boxText = document.createElement("div");
-										boxText.id = i;
-										boxText.className = "labelText" + i;
-										boxText.innerHTML = cityList[i][0];
-										boxList.push(boxText);
+				}
 
-										google.maps.event.addListener(marker, 'click', (function(marker, i) {
-											var contentString = '<div id="infoWindow">' + '<div id="bodyContent">' + '<p>' + "This location is:<br>" + marker.title + '</p>' + '</div>' + '</div>';
+				setMarkers(map, locations, m_country_name_arr, mFinalData, connections);
+			}
 
-											return function() {
-												infowindow.setContent(boxList[this.id]);
-												infowindow.open(map, marker);
-											};
-										})(marker, i));
-										//end add marker listener
-
-										google.maps.event.addDomListener(boxList[i], 'click', (function(marker, i) {
-											return function() {
-												alert('clicked ' + cityList[i][0])
-											}
-										})(marker, i));
-
-									} //endfor
-
-								});
-
-							});
-
-						} else
-							console.log("Geocode failed, status: " + status);
-
+			function setMarkers(map, locations, m_country_name_arr, mFinalData, connections) {
+				
+				var marker, i;
+				for ( i = 0; i < locations.length; i++) {
+					
+					var location = locations[i];
+					
+					var loc_name = location.location_name;
+					var lat = location.latitude;
+					var lng = location.longitude;
+					
+					latlngset = new google.maps.LatLng(lat, lng);
+					var marker = new google.maps.Marker({
+						map : map,
+						title : loc_name,
+						position : latlngset
 					});
 
-				}
+					// map.setCenter(marker.getPosition())
 
+					var mTempUsersArray_CountryWise = mFinalData[m_country_name_arr[i]];
+					
+					var mCountryName = m_country_name_arr[i].toUpperCase();
+					var mFullCountryName = getCountryName(mCountryName);
+					
+					// infowindows[i].setContent('<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>');
+
+					var content = '<div id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></div>';
+
+					// var content = '<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>';
+					var infowindow = new google.maps.InfoWindow();
+					//console.log("infoWindow : "+infowindow);
+					
+					google.maps.event.addListener(marker, 'click', (function(marker, content, infowindow) {
+						return function() {
+							infowindow.setContent(content);
+							infowindow.open(map, marker);
+						};
+					})(marker, content, infowindow));
+
+					google.maps.event.addDomListener(infowindow, 'domready',(function(marker) {
+						
+						return function() {
+							var id = marker.title;						
+							// var infoWindow = infowindow.getContent();
+							console.log("infoWindow : "+marker.title);
+							getOnItemOnclick(connections, marker.title);
+							};
+							
+					})(marker)); 
+				}
 			}
+
+			function getOnItemOnclick(connections, id){
+				// $("#test_"+id).click(function() {
+						// alert(id+' : clicked');
+				// });
+				var locations = [];				
+				var cities = [];				
+				cities = getCityNamesFromCountry(connections, id);
+				
+				var mCountryName = id.toUpperCase();
+				var mFullCountryName = getCountryName(mCountryName);
+
+				var address;
+				for (var i=0; i < cities.length; i++) {
+				  
+				  address = cities[i]+","+mFullCountryName;
+				  console.log("Address : "+address);
+				  
+				  var position = getLocationCoordinate(address);
+				  
+				  if (position != null) {
+						console.log("Position : " + position.lat + " " + position.lng);
+
+						var location = {
+							location_name : m_country_name_arr[i],
+							latitude : position.lat,
+							longitude : position.lng,
+						};
+
+						locations.push(location);
+						
+						console.log("Locations " + locations.length);
+
+					} else {
+						console.log("Geocode failed");
+					}
+				}
 			
+				setCityWiseMarkers(map, locations, cities);
+				
+			}				
+			
+			function setCityWiseMarkers(map, locations, cities) {
+				
+				// var marker, i;
+				for ( i = 0; i < locations.length; i++) {
+					
+					var location = locations[i];
+					
+					var city_name = location.location_name;
+					var city_lat = location.latitude;
+					var city_lng = location.longitude;
+					
+					city_position = new google.maps.LatLng(city_lat, city_lng);
+					
+					var city_marker = new google.maps.Marker({
+						map : map,
+						title : city_name,
+						position : city_position
+					});
+
+					// map.setCenter(marker.getPosition())
+
+					// var mTempUsersArray_CountryWise = mFinalData[m_country_name_arr[i]];
+					
+					// var mCountryName = m_country_name_arr[i].toUpperCase();
+					// var mFullCountryName = getCountryName(mCountryName);
+					
+					// infowindows[i].setContent('<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>');
+
+					var info_content = '<div id="test_pune"><b>'+ city_marker.title  +'</b></div>';
+
+					// var content = '<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>';
+					var city_infowindow = new google.maps.InfoWindow();
+					//console.log("infoWindow : "+infowindow);*/
+					
+					google.maps.event.addListener(city_marker, 'click', (function(marker, info_content, city_infowindow) {
+						
+						return function() {
+							city_infowindow.setContent(info_content);
+							city_infowindow.open(map, city_marker);
+							// alert("Am City");
+						};
+						
+					})(city_marker, info_content, city_infowindow));
+
+					/*google.maps.event.addDomListener(infowindow, 'domready',(function(marker) {
+						
+						return function() {
+							var id = marker.title;						
+							// var infoWindow = infowindow.getContent();
+							console.log("infoWindow : "+marker.title);
+							getOnItemOnclick(connections, marker.title);
+							};
+							
+					})(marker)); */
+					
+				}
+			}
+
+
 			function getCitiesName(connections, country_name_arr) {
 
-	var final_city_array = [];
+				var final_city_array = [];
 
-	for ( j = 0; j < country_name_arr.length; ++j) {
+				for ( j = 0; j < country_name_arr.length; ++j) {
 
-		var city_list = [];
+					var city_list = [];
 
-		for (id in connections) {
+					for (id in connections) {
 
-			if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
-				continue;
+						if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
+							continue;
 
-			if (connections[id].location.country.code == country_name_arr[j]) {
+						if (connections[id].location.country.code == country_name_arr[j]) {
 
-				//Remove the area word from the location name
-				var str = connections[id].location.name, re = /Area/g, result = [], match, last_idx = 0;
+							//Remove the area word from the location name
+							var str = connections[id].location.name, re = /Area/g, result = [], match, last_idx = 0;
 
-				while ( match = re.exec(str)) {
-					result.push(str.slice(last_idx, re.lastIndex - match[0].length), match[0]);
-					last_idx = re.lastIndex;
+							while ( match = re.exec(str)) {
+								result.push(str.slice(last_idx, re.lastIndex - match[0].length), match[0]);
+								last_idx = re.lastIndex;
+							}
+							result.push(str.slice(last_idx));
+							//End for Remove the area word from the location name
+
+							//Remove comma from the string and separate city
+							str1 = result[0];
+							result2 = str1.split(",");
+							//End Remove comma from the string and separate city
+
+							// console.log(result2[0]);
+							if (city_list.indexOf(result2[0]) == -1) {
+								city_list.push(result2[0]);
+							}
+						}
+					}
+					final_city_array.push(city_list);
 				}
-				result.push(str.slice(last_idx));
-				//End for Remove the area word from the location name
 
-				//Remove comma from the string and separate city
-				str1 = result[0];
-				result2 = str1.split(",");
-				//End Remove comma from the string and separate city
+				for ( index1 = 0; index1 < country_name_arr.length; ++index1) {
+					for ( k = 0; k < final_city_array.length; ++k) {
+						if (index1 == k) {
+							final_city_array[country_name_arr[index1]] = final_city_array[k];
+							delete final_city_array[k];
+						}
 
-				// console.log(result2[0]);
-				if (city_list.indexOf(result2[0]) == -1) {
-					city_list.push(result2[0]);
+					}
 				}
-			}
-		}
-		final_city_array.push(city_list);
-	}
 
-	for ( index1 = 0; index1 < country_name_arr.length; ++index1) {
-		for ( k = 0; k < final_city_array.length; ++k) {
-			if (index1 == k) {
-				final_city_array[country_name_arr[index1]] = final_city_array[k];
-				delete final_city_array[k];
+				// console.log(final_city_array);
+				return final_city_array;
 			}
 
-		}
-	}
+			function getCityNamesFromCountry(connections, country_name) {
 
-	// console.log(final_city_array);
-	return final_city_array;
-}
+					var city_list = [];
 
-		
-function getCitywiseConnctions(city_name, total_country_connections) {
+					for (id in connections) {
 
-	var member;
-	var members_arr = [];
+						if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
+							continue;
 
-	for (var i = 0; i < total_country_connections.length; i++) {
-		member = total_country_connections[i];
+						if (connections[id].location.country.code == country_name) {
 
-		// members_arr.push(member);
-		// console.log("Name : "+member.fname+" "+member.lname+" : "+member.location_name);
+							//Remove the area word from the location name
+							var str = connections[id].location.name, re = /Area/g, result = [], match, last_idx = 0;
 
-		var position = member.location_name.search(city_name);
-		if (position != -1) {
-			members_arr.push(member);
-			console.log("Name : " + member.fname + " " + member.lname + " : " + member.location_name);
-		} else {
-			// NOP
-		}
+							while ( match = re.exec(str)) {
+								result.push(str.slice(last_idx, re.lastIndex - match[0].length), match[0]);
+								last_idx = re.lastIndex;
+							}
+							result.push(str.slice(last_idx));
+							//End for Remove the area word from the location name
 
-	};
-	console.log("members_arr : " + members_arr.length);
-	return members_arr;
-}
+							//Remove comma from the string and separate city
+							str1 = result[0];
+							result2 = str1.split(",");
+							//End Remove comma from the string and separate city
+
+							// console.log(result2[0]);
+							if (city_list.indexOf(result2[0]) == -1) {
+								city_list.push(result2[0]);
+							}
+						}
+					}
+				
+				console.log(city_list);
+				return city_list;
+			}
+
+			function getCitywiseConnctions(city_name, total_country_connections) {
+
+				var member;
+				var members_arr = [];
+
+				for (var i = 0; i < total_country_connections.length; i++) {
+					member = total_country_connections[i];
+
+					// members_arr.push(member);
+					// console.log("Name : "+member.fname+" "+member.lname+" : "+member.location_name);
+
+					var position = member.location_name.search(city_name);
+					if (position != -1) {
+						members_arr.push(member);
+						// console.log("Name : " + member.fname + " " + member.lname + " : " + member.location_name);
+					} else {
+						// NOP
+					}
+
+				};
+				// console.log("members_arr : " + members_arr.length);
+				return members_arr;
+			}
 
 		</script>
 		<!-- End of Google Map intialization-->
@@ -348,7 +519,7 @@ function getCitywiseConnctions(city_name, total_country_connections) {
 			}
 
 			function setConnections(connections, metadata) {
-				
+
 				var country_name_arr = [];
 
 				for (id in connections) {
@@ -367,8 +538,7 @@ function getCitywiseConnctions(city_name, total_country_connections) {
 					var user_array = [];
 					for (id in connections) {
 
-						if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || 
-								connections[id].location.country.code == 'oo')
+						if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
 							continue;
 
 						if (connections[id].location.country.code == country_name_arr[index]) {
@@ -380,11 +550,11 @@ function getCitywiseConnctions(city_name, total_country_connections) {
 								fname : connections[id].firstName,
 								lname : connections[id].lastName,
 								id : connections[id].id,
-								location_name: connections[id].location.name,
+								location_name : connections[id].location.name,
 								location : connections[id].location.country.code,
 								profile_url : connections[id].publicProfileUrl
 							};
-							
+
 							user_array.push(user_info);
 						}
 
@@ -416,10 +586,10 @@ function getCitywiseConnctions(city_name, total_country_connections) {
 				}
 
 				initialize(connections, total_countrywise_connections, country_name_arr);
-				
-				// // get cities from country data 
+
+				// // get cities from country data
 				// getCitiesName(connections, country_name_arr);
-			}			
+			}
 
 		</script>
 		<!-- End of Linkedin Stuff -->
