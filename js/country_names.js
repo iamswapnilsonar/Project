@@ -296,3 +296,30 @@ function getLocationCoordinates(address) {
 	console.log("Position : " + position);
 	return position;
 }
+
+/**
+ * Get location co-ordinates (Latitude and Longitude) from location address.
+ * @author VSPLC
+ * @param {Object} address
+ */
+function getLocationCoordinate(address) {
+    
+    var position = {};
+    $.ajax({
+          url: 'http://maps.google.com/maps/api/geocode/json',
+          type: 'GET',
+          data:{address:address,sensor:false},
+          async:false,
+          success: function(result){
+          	
+			try {
+				position.lat = result.results[0].geometry.location.lat;
+              	position.lng = result.results[0].geometry.location.lng;
+			} catch(err) {
+				position = null;
+			}
+          	             
+          }
+       });
+    return position;
+}
