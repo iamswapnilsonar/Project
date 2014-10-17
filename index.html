@@ -74,7 +74,7 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
 				// getCitywiseConnctions("Delhi", mFinalData["in"]);
-				console.log("total_countrywise_connections : " + total_countrywise_connections.length);
+				// console.log("total_countrywise_connections : " + total_countrywise_connections.length);
 
 				var locations = [];
 
@@ -86,89 +86,19 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 					var total_cities = [];
 					total_cities = getCitiesName(connections, country_name_arr);
-					console.log(" " + mFullCountryName + " is total cities is : " + total_cities[m_country_name_arr[i]].length);
-
-					// console.log("Total Connections of " + mFullCountryName);
+					// console.log(" " + mFullCountryName + " is total cities is : " + total_cities[m_country_name_arr[i]].length);
 
 					var address = mFullCountryName;
 
 					var position = getLocationCoordinate(address);
 
 					if (position != null) {
-						console.log("Position : " + position.lat + " " + position.lng);
-
 						var location = {
 							location_name : m_country_name_arr[i],
 							latitude : position.lat,
 							longitude : position.lng,
 						};
-
 						locations.push(location);
-
-						// markers[i] = new google.maps.Marker({
-							// map : map,
-							// position : position,
-						// });
-
-						// infowindows[i] = new google.maps.InfoWindow();
-
-						// var mTempUsersArray_CountryWise = mFinalData[m_country_name_arr[i]];
-
-						// infowindows[i].setContent('<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>');
-// 
-						// google.maps.event.addListener(markers[i], 'click', function() {
-							// infowindow.open(map, markers[i]);
-						// });
-
-						/*google.maps.event.addDomListener(infowindow, 'domready', function() {
-						 $('#test_in').click(function() {
-
-						 map.setZoom(4);
-						 // This will trigger a zoom_changed on the map
-						 map.setCenter(new google.maps.LatLng(20.593684, 78.96288));
-
-						 var marker, i;
-
-						 var infowindow = new google.maps.InfoWindow();
-
-						 for (var i = 0; i < cityList.length; i++) {
-						 marker = new google.maps.Marker({
-						 position : new google.maps.LatLng(cityList[i][1], cityList[i][2]),
-						 map : map,
-						 id : i,
-						 title : cityList[i][0]
-						 });
-
-						 var boxText = document.createElement("div");
-						 boxText.id = i;
-						 boxText.className = "labelText" + i;
-						 boxText.innerHTML = cityList[i][0];
-						 boxList.push(boxText);
-
-						 google.maps.event.addListener(marker, 'click', (function(marker, i) {
-						 var contentString = '<div id="infoWindow">' + '<div id="bodyContent">' + '<p>' + "This location is:<br>" + marker.title + '</p>' + '</div>' + '</div>';
-
-						 return function() {
-						 infowindow.setContent(boxList[this.id]);
-						 infowindow.open(map, marker);
-						 };
-						 })(marker, i));
-						 //end add marker listener
-
-						 google.maps.event.addDomListener(boxList[i], 'click', (function(marker, i) {
-						 return function() {
-						 alert('clicked ' + cityList[i][0])
-						 }
-						 })(marker, i));
-
-						 } //endfor
-
-						 });
-
-						 });*/
-
-						console.log("Locations " + locations.length);
-
 					} else {
 						console.log("Geocode failed");
 					};
@@ -203,13 +133,8 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 					var mCountryName = m_country_name_arr[i].toUpperCase();
 					var mFullCountryName = getCountryName(mCountryName);
 					
-					// infowindows[i].setContent('<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>');
-
 					var content = '<div id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></div>';
-
-					// var content = '<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>';
 					var infowindow = new google.maps.InfoWindow();
-					//console.log("infoWindow : "+infowindow);
 					
 					google.maps.event.addListener(marker, 'click', (function(marker, content, infowindow) {
 						return function() {
@@ -222,66 +147,25 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 						
 						return function() {
 							var id = marker.title;						
-							// var infoWindow = infowindow.getContent();
-							console.log("infoWindow : "+marker.title);
-							getOnItemOnclick(connections, marker.title);
-							};
+							// console.log("infoWindow : "+marker.title);
+							getOnItemOnclick(connections, mFinalData, marker.title);
+						};
 							
 					})(marker)); 
 				}
 			}
 
-			function getOnItemOnclick(connections, id){
-				// $("#test_"+id).click(function() {
-						// alert(id+' : clicked');
-				// });
-				var locations = [];				
-				var cities = [];				
-				cities = getCityNamesFromCountry(connections, id);
+			function setCityWiseMarkers(map, locations, id, cities) {
 				
-				var mCountryName = id.toUpperCase();
-				var mFullCountryName = getCountryName(mCountryName);
-
-				var address;
-				for (var i=0; i < cities.length; i++) {
-				  
-				  address = cities[i]+","+mFullCountryName;
-				  console.log("Address : "+address);
-				  
-				  var position = getLocationCoordinate(address);
-				  
-				  if (position != null) {
-						console.log("Position : " + position.lat + " " + position.lng);
-
-						var location = {
-							location_name : m_country_name_arr[i],
-							latitude : position.lat,
-							longitude : position.lng,
-						};
-
-						locations.push(location);
-						
-						console.log("Locations " + locations.length);
-
-					} else {
-						console.log("Geocode failed");
-					}
-				}
-			
-				setCityWiseMarkers(map, locations, cities);
-				
-			}				
-			
-			function setCityWiseMarkers(map, locations, cities) {
-				
-				// var marker, i;
+				var city_marker;
 				for ( i = 0; i < locations.length; i++) {
 					
 					var location = locations[i];
 					
-					var city_name = location.location_name;
+					var city_name = location.location_name;					
 					var city_lat = location.latitude;
 					var city_lng = location.longitude;
+					var city = location.city_name;					
 					
 					city_position = new google.maps.LatLng(city_lat, city_lng);
 					
@@ -291,27 +175,22 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 						position : city_position
 					});
 
-					// map.setCenter(marker.getPosition())
+					console.log("id : "+id);
+					var position = getLocationCoordinate(id);
+					console.log("position : "+position.lat+" "+position.lng);
 
-					// var mTempUsersArray_CountryWise = mFinalData[m_country_name_arr[i]];
-					
-					// var mCountryName = m_country_name_arr[i].toUpperCase();
-					// var mFullCountryName = getCountryName(mCountryName);
-					
-					// infowindows[i].setContent('<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>');
+					// map.setCenter();
 
-					var info_content = '<div id="test_pune"><b>'+ city_marker.title  +'</b></div>';
+					var city_connections = getCitywiseConnctions(city, mFinalData[id]);
 
-					// var content = '<a href="#" id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></a>';
+					var info_content = '<div id="test_pune"><b>'+ city_marker.title  +'= </b>'+city_connections.length+'</div>';
 					var city_infowindow = new google.maps.InfoWindow();
-					//console.log("infoWindow : "+infowindow);*/
 					
-					google.maps.event.addListener(city_marker, 'click', (function(marker, info_content, city_infowindow) {
+					google.maps.event.addListener(city_marker, 'click', (function(city_marker, info_content, city_infowindow) {
 						
 						return function() {
 							city_infowindow.setContent(info_content);
 							city_infowindow.open(map, city_marker);
-							// alert("Am City");
 						};
 						
 					})(city_marker, info_content, city_infowindow));
@@ -330,15 +209,45 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				}
 			}
 
+			function getOnItemOnclick(connections, mFinalData, id){
+				// $("#test_"+id).click(function() {
+						// alert(id+' : clicked');
+				// });
+				var locations = [];				
+				var cities = [];				
+				cities = getCityNamesFromCountry(connections, id);
+				
+				var mCountryName = id.toUpperCase();
+				var mFullCountryName = getCountryName(mCountryName);
+
+				var address;
+				for (var i=0; i < cities.length; i++) {
+				  address = cities[i]+","+mFullCountryName;
+				  var position = getLocationCoordinate(address);
+				  
+				  if (position != null) {
+						var location = {
+							city_name : cities[i],
+							location_name : address,
+							latitude : position.lat,
+							longitude : position.lng,
+						};
+
+						locations.push(location);
+					} else {
+						console.log("Geocode failed");
+					}
+				}
+			
+				setCityWiseMarkers(map, locations, id, cities);
+			}				
 
 			function getCitiesName(connections, country_name_arr) {
 
 				var final_city_array = [];
-
+				
 				for ( j = 0; j < country_name_arr.length; ++j) {
-
 					var city_list = [];
-
 					for (id in connections) {
 
 						if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
@@ -379,8 +288,6 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 					}
 				}
-
-				// console.log(final_city_array);
 				return final_city_array;
 			}
 
@@ -410,14 +317,12 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 							result2 = str1.split(",");
 							//End Remove comma from the string and separate city
 
-							// console.log(result2[0]);
 							if (city_list.indexOf(result2[0]) == -1) {
 								city_list.push(result2[0]);
 							}
 						}
 					}
 				
-				console.log(city_list);
 				return city_list;
 			}
 
@@ -429,19 +334,14 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				for (var i = 0; i < total_country_connections.length; i++) {
 					member = total_country_connections[i];
 
-					// members_arr.push(member);
-					// console.log("Name : "+member.fname+" "+member.lname+" : "+member.location_name);
-
 					var position = member.location_name.search(city_name);
 					if (position != -1) {
 						members_arr.push(member);
-						// console.log("Name : " + member.fname + " " + member.lname + " : " + member.location_name);
 					} else {
 						// NOP
 					}
 
 				};
-				// console.log("members_arr : " + members_arr.length);
 				return members_arr;
 			}
 
@@ -523,7 +423,7 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				var country_name_arr = [];
 
 				for (id in connections) {
-
+					
 					if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
 						continue;
 
@@ -555,11 +455,13 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 								profile_url : connections[id].publicProfileUrl
 							};
 
+							
 							user_array.push(user_info);
 						}
 
 					}
-
+					
+					console.log(user_array);
 					// add users data..
 					total_countrywise_connections.push(user_array);
 				}
@@ -577,18 +479,7 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 					}
 				}
-
-				// console.log(total_countrywise_connections);
-				// console.log(total_countrywise_connections.length + " " + country_name_arr.length);
-
-				for ( index = 0; index < country_name_arr.length; ++index) {
-					// console.log("Country : " + country_name_arr[index]);
-				}
-
 				initialize(connections, total_countrywise_connections, country_name_arr);
-
-				// // get cities from country data
-				// getCitiesName(connections, country_name_arr);
 			}
 
 		</script>

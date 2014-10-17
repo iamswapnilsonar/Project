@@ -282,7 +282,7 @@ function getLocationCoordinates(address) {
 			mLattitude = results[0].geometry.location.lat();
 			mLongitude = results[0].geometry.location.lng();
 
-			console.log(address + " mLattitude : " + mLattitude + " mLongitude : " + mLongitude);
+			// console.log(address + " mLattitude : " + mLattitude + " mLongitude : " + mLongitude);
 			position = new google.maps.LatLng(mLattitude, mLongitude);
 			
 		} else{
