@@ -246,7 +246,6 @@ var isoCountries = {
 	'ZW' : 'Zimbabwe'
 };
 
-
 /**
  * Get Full country name from two-letter country code.
  * @author VSPLC
@@ -269,7 +268,7 @@ function getCountryName(countryCode) {
  */
 
 function getLocationCoordinates(address) {
-	
+
 	var position;
 	var geocoder = new google.maps.Geocoder();
 
@@ -284,13 +283,13 @@ function getLocationCoordinates(address) {
 
 			// console.log(address + " mLattitude : " + mLattitude + " mLongitude : " + mLongitude);
 			position = new google.maps.LatLng(mLattitude, mLongitude);
-			
-		} else{
+
+		} else {
 			console.log("Geocode failed, status: " + status);
 			// console.log(" Position : " + position);
 			// return position;
 		}
-			
+
 	});
 
 	console.log("Position : " + position);
@@ -303,23 +302,94 @@ function getLocationCoordinates(address) {
  * @param {Object} address
  */
 function getLocationCoordinate(address) {
-    
-    var position = {};
-    $.ajax({
-          url: 'http://maps.google.com/maps/api/geocode/json',
-          type: 'GET',
-          data:{address:address,sensor:false},
-          async:false,
-          success: function(result){
-          	
+
+	var position = {};
+	$.ajax({
+		url : 'http://maps.google.com/maps/api/geocode/json',
+		type : 'GET',
+		data : {
+			address : address,
+			sensor : false
+		},
+		async : false,
+		success : function(result) {
+
 			try {
 				position.lat = result.results[0].geometry.location.lat;
-              	position.lng = result.results[0].geometry.location.lng;
+				position.lng = result.results[0].geometry.location.lng;
 			} catch(err) {
 				position = null;
 			}
-          	             
-          }
-       });
-    return position;
+
+		}
+	});
+	return position;
 }
+
+/**
+ * Get location co-ordinates (Latitude and Longitude) from location address.
+ * @author VSPLC
+ * @param {Object} address
+ */
+function getProvienceCodeOfLocation(address) {
+
+	var res;
+	var provience_code;
+	var country_code;
+	var admin_level_found = false;
+
+	$.ajax({
+		url : 'http://maps.google.com/maps/api/geocode/json',
+		type : 'GET',
+		data : {
+			address : address,
+			sensor : false
+		},
+		async : false,
+		success : function(result) {
+
+			try {
+
+				var address_components = result.results[0].address_components;
+
+				for (var i = 0; i < address_components.length; i++) {
+
+					var admin_types = address_components[i].types;
+
+					for (var j = 0; j < admin_types.length; j++) {
+
+						if (admin_types[j] == 'country') {
+							country_code = address_components[i].short_name;
+							// console.log('country_code:' + country_code);							
+						}
+
+						if (admin_types[j] == 'administrative_area_level_1') {
+							provience_code = address_components[i].short_name;
+							// console.log('provience_code:' + provience_code);
+							res = provience_code;
+							admin_level_found = true;
+							break;
+						}
+
+					}
+
+				};
+
+				// if administrative level not found
+				if (!admin_level_found) {
+					res = country_code;
+					// console.log('admin_level_found:' + res);
+				}
+
+			} catch(err) {
+				res = null;
+				// console.log('catch :' + err);
+			}
+
+		}
+	});
+
+	// console.log('result :' + res);
+	return res;
+}
+
