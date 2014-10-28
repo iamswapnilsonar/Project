@@ -1,4 +1,4 @@
 Project
 =======
 
-This is sample project for linkedin prototype.
+This is sample project for prototype.
