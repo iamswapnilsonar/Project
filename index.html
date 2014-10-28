@@ -18,27 +18,47 @@
 			}
 		</style>
 
-		<!--<script src="js/jquery-1.4.1.min.js" type="text/javascript"></script>
-		<script src="js/jquery-1.9.1.js" type="text/javascript"></script>-->
+		<script type='text/javascript' src='https://www.google.com/jsapi'></script>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="http://www.santarosa.edu/~jperetz/projects/lib/prettify/prettify.js"></script>
 
 		<script src="http://maps.googleapis.com/maps/api/js?v=3.exp"></script>
-		<script type="text/javascript" src="js/country_names.js"></script>
 
 		<script type="text/javascript" src="http://platform.linkedin.com/in.js">
 api_key: 752f7e023f5cet
+Secret_Key:8hEIlinuKm6NElKu
+OAuth_User_Token:d85dac7f-2152-464c-a4cd-fce0090c2643
+OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 authorize: true
 credentials_cookie: true
 credentials_cookie_crc: true
 onLoad: onLinkedInLoad
 scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_groups r_fullprofile rw_nus r_contactinfo
-Secret_Key:8hEIlinuKm6NElKu
-OAuth_User_Token:d85dac7f-2152-464c-a4cd-fce0090c2643
-OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 		</script>
+
+		<script type="text/javascript" src="js/country_names.js"></script>
+		<script type="text/javascript" src="js/linkedin_utils.js"></script>
+		<script type="text/javascript" src="js/geochart.js"></script>
 
 		<!-- Google Map intialization-->
 		<script>
+			google.load('visualization', '1', {
+				'packages' : ['geochart']
+			});
+
+			var chart;
+
+			var width, height, selectedRegion, resolution;
+
+			var global_provinceOptions, global_provinceData;
+			var global_data, global_options;
+
+			function refreshGeoChart() {
+				chart.draw(global_data, global_options);
+			}
+
+			// google.setOnLoadCallback(drawMap);
+
 			// Note: This example requires that you consent to location sharing when
 			// prompted by your browser. If you see a blank space instead of the map, this
 			// is probably because you have denied permission for location sharing.
@@ -48,13 +68,14 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 			var mFinalData = [];
 			var m_country_name_arr = [];
 
-			var boxList = [];
-
-			var cityList = [['Pune', 18.5204303, 73.8567437, 1], ['Mumbai', 19.0759837, 72.87765589999999, 2], ['Delhi', 28.635308, 77.22496, 3], ['Kolkata', 22.572646, 88.36389500000001, 4], ['Chennai', 13.0597049, 80.2252278, 5]];
-
-			var markers = [];
-			var infowindows = [];
-
+			/**
+			 * Map initialisation for country wise markers
+			 * @author VSPLC
+			 *
+			 * @param {Object} connections
+			 * @param {Object} total_countrywise_connections
+			 * @param {Object} country_name_arr => array of country codes
+			 */
 			function initialize(connections, total_countrywise_connections, country_name_arr) {
 
 				mFinalData = total_countrywise_connections;
@@ -78,15 +99,22 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 				var locations = [];
 
+				/*var total_cities = [];
+				total_cities = getCitiesName(connections, country_name_arr);
+				console.log("City Length : " + total_cities.length);
+
+				for (var i=0; i < total_cities.length; i++) {
+				var cities = total_cities["in"];
+				for (var j=0; j < cities.length; j++) {
+				console.log("City Name : " + cities[j]);
+				}
+				};*/
+
 				// we currently fixed it to 10 countries instead of "total_countrywise_connections"
 				for (var i = 0; i < total_countrywise_connections.length; i++) {
 
 					var mCountryName = m_country_name_arr[i].toUpperCase();
 					var mFullCountryName = getCountryName(mCountryName);
-
-					var total_cities = [];
-					total_cities = getCitiesName(connections, country_name_arr);
-					// console.log(" " + mFullCountryName + " is total cities is : " + total_cities[m_country_name_arr[i]].length);
 
 					var address = mFullCountryName;
 
@@ -108,18 +136,60 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				setMarkers(map, locations, m_country_name_arr, mFinalData, connections);
 			}
 
+			/**
+			 * Map initialisation for city wise marker
+			 * @author VSPLC
+			 *
+			 * @param {Object} connections
+			 * @param {Object} total_countrywise_connections
+			 * @param {Object} country_name_arr => array of country codes
+			 */
+			function initializeForCities(connections, total_countrywise_connections, country_name_arr) {
+
+				mFinalData = total_countrywise_connections;
+				m_country_name_arr = country_name_arr;
+
+				var mapOptions = {
+					scaleControl : true,
+					// Pune - 18.5203, 73.8567
+					// India - 20.593684, 78.96288
+					center : new google.maps.LatLng(20.593684, 78.96288),
+					zoom : 2
+				};
+
+				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+				for (var i = 0; i < country_name_arr.length; i++) {
+					// console.log("Country Name : "+country_name_arr[i]);
+					getOnItemOnclick(connections, mFinalData, country_name_arr[i]);
+				};
+
+			}
+
+			/**
+			 * Method used for plotting the country wise markers of linkedin users.
+			 * @author VSPLC
+			 *
+			 * @param {Object} map
+			 * @param {Object} locations => custom location objects with properties of lat-lang, title etc
+			 * @param {Object} m_country_name_arr => array of country codes
+			 * @param {Object} mFinalData => Total Country Wise Connections
+			 * @param {Object} connections
+			 */
 			function setMarkers(map, locations, m_country_name_arr, mFinalData, connections) {
-				
+
 				var marker, i;
 				for ( i = 0; i < locations.length; i++) {
-					
+
 					var location = locations[i];
-					
+
 					var loc_name = location.location_name;
 					var lat = location.latitude;
 					var lng = location.longitude;
-					
+
+					// lat-lang object..
 					latlngset = new google.maps.LatLng(lat, lng);
+
 					var marker = new google.maps.Marker({
 						map : map,
 						title : loc_name,
@@ -129,13 +199,13 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 					// map.setCenter(marker.getPosition())
 
 					var mTempUsersArray_CountryWise = mFinalData[m_country_name_arr[i]];
-					
+
 					var mCountryName = m_country_name_arr[i].toUpperCase();
 					var mFullCountryName = getCountryName(mCountryName);
-					
+
 					var content = '<div id="test_' + m_country_name_arr[i] + '"><b> ' + mFullCountryName + ' = ' + mTempUsersArray_CountryWise.length + '</b></div>';
 					var infowindow = new google.maps.InfoWindow();
-					
+
 					google.maps.event.addListener(marker, 'click', (function(marker, content, infowindow) {
 						return function() {
 							infowindow.setContent(content);
@@ -143,215 +213,27 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 						};
 					})(marker, content, infowindow));
 
-					google.maps.event.addDomListener(infowindow, 'domready',(function(marker) {
-						
+					google.maps.event.addDomListener(infowindow, 'domready', (function(marker) {
+
 						return function() {
-							var id = marker.title;						
+							var id = marker.title;
 							// console.log("infoWindow : "+marker.title);
 							getOnItemOnclick(connections, mFinalData, marker.title);
 						};
-							
-					})(marker)); 
+
+					})(marker));
 				}
-			}
-
-			function setCityWiseMarkers(map, locations, id, cities) {
-				
-				var city_marker;
-				for ( i = 0; i < locations.length; i++) {
-					
-					var location = locations[i];
-					
-					var city_name = location.location_name;					
-					var city_lat = location.latitude;
-					var city_lng = location.longitude;
-					var city = location.city_name;					
-					
-					city_position = new google.maps.LatLng(city_lat, city_lng);
-					
-					var city_marker = new google.maps.Marker({
-						map : map,
-						title : city_name,
-						position : city_position
-					});
-
-					console.log("id : "+id);
-					var position = getLocationCoordinate(id);
-					console.log("position : "+position.lat+" "+position.lng);
-
-					// map.setCenter();
-
-					var city_connections = getCitywiseConnctions(city, mFinalData[id]);
-
-					var info_content = '<div id="test_pune"><b>'+ city_marker.title  +'= </b>'+city_connections.length+'</div>';
-					var city_infowindow = new google.maps.InfoWindow();
-					
-					google.maps.event.addListener(city_marker, 'click', (function(city_marker, info_content, city_infowindow) {
-						
-						return function() {
-							city_infowindow.setContent(info_content);
-							city_infowindow.open(map, city_marker);
-						};
-						
-					})(city_marker, info_content, city_infowindow));
-
-					/*google.maps.event.addDomListener(infowindow, 'domready',(function(marker) {
-						
-						return function() {
-							var id = marker.title;						
-							// var infoWindow = infowindow.getContent();
-							console.log("infoWindow : "+marker.title);
-							getOnItemOnclick(connections, marker.title);
-							};
-							
-					})(marker)); */
-					
-				}
-			}
-
-			function getOnItemOnclick(connections, mFinalData, id){
-				// $("#test_"+id).click(function() {
-						// alert(id+' : clicked');
-				// });
-				var locations = [];				
-				var cities = [];				
-				cities = getCityNamesFromCountry(connections, id);
-				
-				var mCountryName = id.toUpperCase();
-				var mFullCountryName = getCountryName(mCountryName);
-
-				var address;
-				for (var i=0; i < cities.length; i++) {
-				  address = cities[i]+","+mFullCountryName;
-				  var position = getLocationCoordinate(address);
-				  
-				  if (position != null) {
-						var location = {
-							city_name : cities[i],
-							location_name : address,
-							latitude : position.lat,
-							longitude : position.lng,
-						};
-
-						locations.push(location);
-					} else {
-						console.log("Geocode failed");
-					}
-				}
-			
-				setCityWiseMarkers(map, locations, id, cities);
-			}				
-
-			function getCitiesName(connections, country_name_arr) {
-
-				var final_city_array = [];
-				
-				for ( j = 0; j < country_name_arr.length; ++j) {
-					var city_list = [];
-					for (id in connections) {
-
-						if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
-							continue;
-
-						if (connections[id].location.country.code == country_name_arr[j]) {
-
-							//Remove the area word from the location name
-							var str = connections[id].location.name, re = /Area/g, result = [], match, last_idx = 0;
-
-							while ( match = re.exec(str)) {
-								result.push(str.slice(last_idx, re.lastIndex - match[0].length), match[0]);
-								last_idx = re.lastIndex;
-							}
-							result.push(str.slice(last_idx));
-							//End for Remove the area word from the location name
-
-							//Remove comma from the string and separate city
-							str1 = result[0];
-							result2 = str1.split(",");
-							//End Remove comma from the string and separate city
-
-							// console.log(result2[0]);
-							if (city_list.indexOf(result2[0]) == -1) {
-								city_list.push(result2[0]);
-							}
-						}
-					}
-					final_city_array.push(city_list);
-				}
-
-				for ( index1 = 0; index1 < country_name_arr.length; ++index1) {
-					for ( k = 0; k < final_city_array.length; ++k) {
-						if (index1 == k) {
-							final_city_array[country_name_arr[index1]] = final_city_array[k];
-							delete final_city_array[k];
-						}
-
-					}
-				}
-				return final_city_array;
-			}
-
-			function getCityNamesFromCountry(connections, country_name) {
-
-					var city_list = [];
-
-					for (id in connections) {
-
-						if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
-							continue;
-
-						if (connections[id].location.country.code == country_name) {
-
-							//Remove the area word from the location name
-							var str = connections[id].location.name, re = /Area/g, result = [], match, last_idx = 0;
-
-							while ( match = re.exec(str)) {
-								result.push(str.slice(last_idx, re.lastIndex - match[0].length), match[0]);
-								last_idx = re.lastIndex;
-							}
-							result.push(str.slice(last_idx));
-							//End for Remove the area word from the location name
-
-							//Remove comma from the string and separate city
-							str1 = result[0];
-							result2 = str1.split(",");
-							//End Remove comma from the string and separate city
-
-							if (city_list.indexOf(result2[0]) == -1) {
-								city_list.push(result2[0]);
-							}
-						}
-					}
-				
-				return city_list;
-			}
-
-			function getCitywiseConnctions(city_name, total_country_connections) {
-
-				var member;
-				var members_arr = [];
-
-				for (var i = 0; i < total_country_connections.length; i++) {
-					member = total_country_connections[i];
-
-					var position = member.location_name.search(city_name);
-					if (position != -1) {
-						members_arr.push(member);
-					} else {
-						// NOP
-					}
-
-				};
-				return members_arr;
 			}
 
 		</script>
 		<!-- End of Google Map intialization-->
 
-		<script type="text/javascript" src="js/country_names.js"></script>
-
 		<!-- Linkedin Stuff -->
 		<script type="text/javascript">
+			var global_connections = null;
+			var global_total_countrywise_connections = null;
+			var global_country_name_arr = null;
+
 			function onLinkedInLoad() {
 				IN.Event.on(IN, "auth", onLinkedInAuth);
 				var div = document.getElementByClass("showorhide");
@@ -360,12 +242,10 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 
 			function onLinkedInAuth() {
 				// IN.API.Profile("me").result(ShowProfileData);
-
 				IN.API.Profile("me").fields("firstName", "lastName", "industry", "location:(name)", "picture-url", "headline", "summary", "num-connections", "public-profile-url", "distance", "positions", "email-address", "educations", "date-of-birth", "threeCurrentPositions").result(displayProfiles).error(displayProfilesErrors);
 			}
 
-			//var foo = null;
-
+			// Display user's profile information
 			function displayProfiles(profiles) {
 				document.getElementById('div1').style.display = 'block';
 				member = profiles.values[0];
@@ -374,8 +254,8 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				document.getElementById("imgProfile").src = member.pictureUrl;
 				document.getElementById("lblEmail").innerHTML = member.emailAddress;
 				document.getElementById("lblProfile").innerHTML = member.publicProfileUrl;
-				document.getElementById("lblconnection").innerHTML = member.numConnections;
-				foo = member.numConnections;
+				// document.getElementById("lblconnection").innerHTML = member.numConnections;
+				// foo = member.numConnections;
 			}
 
 			function onLinkedInLogout() {
@@ -399,87 +279,11 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 				.result(function(result, metadata) {
 					// var data = JSON.parse(JSON.stringify(result));
 					// console.log(JSON.stringify(result));
-					// console.log(data["values"][0]["firstName"]);
-					// console.log(data["values"][0]["lastName"]);
 
-					//console.log("Connection Results : "+data);
+					// console.log("Connection Results : "+data);
 					setConnections(result.values, metadata);
 				});
 
-			}
-
-			function arraySearch(arr, val) {
-				for (var i = 0; i < arr.length; i++) {
-					if (arr[i] == val) {
-						return i;
-					} else {
-						return false;
-					}
-				}
-			}
-
-			function setConnections(connections, metadata) {
-
-				var country_name_arr = [];
-
-				for (id in connections) {
-					
-					if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
-						continue;
-
-					if (country_name_arr.indexOf(connections[id].location.country.code) == -1) {
-						country_name_arr.push(connections[id].location.country.code);
-					}
-				}
-
-				var total_countrywise_connections = [];
-				for ( index = 0; index < country_name_arr.length; ++index) {
-
-					var user_array = [];
-					for (id in connections) {
-
-						if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
-							continue;
-
-						if (connections[id].location.country.code == country_name_arr[index]) {
-
-							var temp = {};
-							var temp_array = [];
-
-							var user_info = {
-								fname : connections[id].firstName,
-								lname : connections[id].lastName,
-								id : connections[id].id,
-								location_name : connections[id].location.name,
-								location : connections[id].location.country.code,
-								profile_url : connections[id].publicProfileUrl
-							};
-
-							
-							user_array.push(user_info);
-						}
-
-					}
-					
-					console.log(user_array);
-					// add users data..
-					total_countrywise_connections.push(user_array);
-				}
-
-				for ( index = 0; index < country_name_arr.length; ++index) {
-					for ( i = 0; i < total_countrywise_connections.length; ++i) {
-						if (index == i) {
-
-							//total_countrywise_connections["in"] = users array having country is India.. Noted
-							total_countrywise_connections[country_name_arr[index]] = total_countrywise_connections[i];
-
-							// free up memory
-							delete total_countrywise_connections[i];
-						}
-
-					}
-				}
-				initialize(connections, total_countrywise_connections, country_name_arr);
 			}
 
 		</script>
@@ -508,7 +312,6 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 		</script>
 
 		<script type="IN/Login"></script>
-		<input type="button" name="search1" value="Search LinkedIn!" onclick="search()">
 		<input type="button" name="con" value="Connection" onclick="onLinkedInconnection()">
 
 		<div id="div1" style="display:none">
@@ -545,7 +348,20 @@ OAuth_User_Secret:7af07505-1776-4b78-8f63-c8cdd8ddb54b
 			<div id="connections"></div>
 		</div>
 
+		<div id="radioBtns">
+			<p>
+				Filtering :
+			</p>
+			<input type="radio" id="rd_country" name="radio" checked="true" onclick="setCountryMarkers()"/>
+			Conutry
+			<input type="radio" id="rd_cities" name="radio" onclick="setCityMarkers()"/>
+			City
+		</div>
+
 		<div id="map-canvas"></div>
 
+		<input type="button" name="refresh" value="Back" onclick="refreshGeoChart()">
+
+		<div id="chart_div"></div>
 	</body>
 </html>
