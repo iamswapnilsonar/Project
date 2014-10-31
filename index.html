@@ -81,8 +81,7 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 				mFinalData = total_countrywise_connections;
 				m_country_name_arr = country_name_arr;
 
-				// var position = getLocationCoordinate("Delhi,India");
-				// console.log("Position : " + position.lat + " " + position.lng);
+				// getCitywiseConnctions("Pune", global_total_countrywise_connections);
 
 				var mapOptions = {
 					scaleControl : true,
@@ -94,8 +93,8 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 
 				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-				// getCitywiseConnctions("Delhi", mFinalData["in"]);
-				// console.log("total_countrywise_connections : " + total_countrywise_connections.length);
+				// getCitywiseConnctions("Pune", global_total_countrywise_connections["in"]);
+				// console.log("total_countrywise_connections : " + global_total_countrywise_connections["in"].length);
 
 				var locations = [];
 
@@ -274,7 +273,7 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 
 			function onLinkedInconnection() {
 				// here, we pass the fields as individual string parameters
-				IN.API.Connections("me").fields("id", "firstName", "lastName", "pictureUrl", "publicProfileUrl", "threeCurrentPositions", "location:(name,country:(code))")
+				IN.API.Connections("me").fields("id", "firstName", "lastName", "pictureUrl", "publicProfileUrl", "threeCurrentPositions", "location:(name,country:(code))", "industry")
 				//.params({"count" : foo})
 				.result(function(result, metadata) {
 					// var data = JSON.parse(JSON.stringify(result));
