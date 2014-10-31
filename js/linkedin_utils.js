@@ -10,7 +10,9 @@ function setConnections(connections, metadata) {
 
 	for (id in connections) {
 
-		if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
+		// console.log(connections[id].industry);
+
+		if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo' || connections[id].industry == 'undefined')
 			continue;
 
 		if (country_name_arr.indexOf(connections[id].location.country.code) == -1) {
@@ -24,7 +26,7 @@ function setConnections(connections, metadata) {
 		var user_array = [];
 		for (id in connections) {
 
-			if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo')
+			if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo' || connections[id].industry == 'undefined')
 				continue;
 
 			if (connections[id].location.country.code == country_name_arr[index]) {
@@ -38,7 +40,8 @@ function setConnections(connections, metadata) {
 					id : connections[id].id,
 					location_name : connections[id].location.name,
 					location : connections[id].location.country.code,
-					profile_url : connections[id].publicProfileUrl
+					profile_url : connections[id].publicProfileUrl,
+					industry : connections[id].industry
 				};
 
 				user_array.push(user_info);
