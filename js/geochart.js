@@ -5,7 +5,7 @@
 function drawMap() {
 	// set your data and options
 
-	var tableColumn = [["Country", 'Connections']];
+	var tableColumn = [["Country", 'Connections', "Industry"]];
 
 	// Add country name and its linkedin users
 	for (var i = 0; i < global_country_name_arr.length; i++) {
@@ -15,8 +15,9 @@ function drawMap() {
 
 		var mCountry = global_country_name_arr[i].toUpperCase();
 		var mConnections = global_total_countrywise_connections[global_country_name_arr[i]];
-
-		var tableRow = [mCountry, mConnections.length];
+		var mIndustries = global_total_conutrywise_industry_name_arr[global_country_name_arr[i]];
+		
+		var tableRow = [mCountry, mConnections.length, mIndustries.length];
 		tableColumn.push(tableRow);
 	};
 
