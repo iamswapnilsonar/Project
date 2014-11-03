@@ -47,6 +47,7 @@ function drawMap() {
 		var selection = chart.getSelection();
 
 		if (selection.length == 1) {
+			
 			var selectedRow = selection[0].row;
 			selectedRegion = data.getValue(selectedRow, 0);
 			// console.log("City : "+ selectedRegion);
@@ -54,7 +55,7 @@ function drawMap() {
 
 			var cities = getCityNamesFromCountry(global_connections, selectedRegion.toLowerCase());
 
-			var tableStateColumn = [["Country", 'Connections']];
+			var tableStateColumn = [["Country", 'Connections', "Industry"]];
 
 			var arr_province = [];
 
@@ -72,7 +73,7 @@ function drawMap() {
 					if ( typeof addComponent === "undefined") {
 						// NOP
 					} else {
-						console.log("Prov Address : " + address + " PC : " + addComponent);
+						// console.log("Prov Address : " + address + " PC : " + addComponent);
 						arr_province.push(addComponent);
 					}
 
@@ -119,7 +120,7 @@ function drawMap() {
 						if ( typeof addComponent === "undefined") {
 							// NOP
 						} else {
-							console.log("Prov Address : " + address + " PC : " + addComponent);
+							// console.log("Prov Address : " + address + " PC : " + addComponent);
 							arr_province.push(addComponent);
 						}
 
@@ -152,7 +153,7 @@ function drawMap() {
 				// retrieving all cities from state/province
 				var arr_cities = [];
 				arr_cities = arr_province_cities[arr_province[index]];
-				console.log(arr_province[index] + " Cities : " + arr_cities.length);
+				// console.log(arr_province[index] + " Cities : " + arr_cities.length);
 
 				// simple bucket for storing connections
 				var temp_state_connections = [];
@@ -161,7 +162,7 @@ function drawMap() {
 
 					// get connections form particular city
 					var temp = getCitywiseConnctions(arr_cities[i], global_total_countrywise_connections[selectedRegion.toLowerCase()]);
-					console.log("City : " + arr_cities[i] + " Connections : " + temp.length);
+					// console.log("City : " + arr_cities[i] + " Connections : " + temp.length);
 
 					for (var j = 0; j < temp.length; j++) {
 						temp_state_connections.push(temp[j]);
@@ -190,7 +191,7 @@ function drawMap() {
 
 			}
 
-			console.log(arr_statewise_connections);
+			// console.log(arr_statewise_connections);
 
 			//End Code for make array of states accoding to the cities
 
@@ -198,9 +199,11 @@ function drawMap() {
 
 				var stateProvienceCode = selectedRegion + "-" + arr_province[i];
 
-				console.log(stateProvienceCode);
+				// console.log(stateProvienceCode);
 
-				var tableDataRow = [stateProvienceCode, arr_statewise_connections[arr_province[i]].length];
+				var number = getIndustrywiseConnections(arr_statewise_connections[arr_province[i]], global_total_conutrywise_industry_name_arr[selectedRegion.toLowerCase()]);
+
+				var tableDataRow = [stateProvienceCode, arr_statewise_connections[arr_province[i]].length, number];
 				tableStateColumn.push(tableDataRow);
 
 			};
