@@ -10,12 +10,12 @@ function setConnections(connections, metadata) {
 	var total_conutrywise_industry_name_arr = [];
 
 	for (id in connections) {
-		
+
 		// newly added condition for industry name
 		if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo' || typeof connections[id].industry === 'undefined')
 			continue;
-		
-		// prepare the array for country-codes 
+
+		// prepare the array for country-codes
 		if (country_name_arr.indexOf(connections[id].location.country.code) == -1) {
 			country_name_arr.push(connections[id].location.country.code);
 		}
@@ -28,7 +28,7 @@ function setConnections(connections, metadata) {
 
 		var user_array = [];
 		var industry_array = [];
-		
+
 		for (id in connections) {
 
 			if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo' || typeof connections[id].industry === 'undefined')
@@ -36,7 +36,7 @@ function setConnections(connections, metadata) {
 
 			if (connections[id].location.country.code == country_name_arr[index]) {
 
-				// linkedin user 
+				// linkedin user
 				var user_info = {
 					fname : connections[id].firstName,
 					lname : connections[id].lastName,
@@ -46,11 +46,11 @@ function setConnections(connections, metadata) {
 					profile_url : connections[id].publicProfileUrl,
 					industry : connections[id].industry
 				};
-				
+
 				// linkedin users array
 				user_array.push(user_info);
 			}
-			
+
 			// creating industry names array for specific country
 			if (connections[id].location.country.code == country_name_arr[index] && industry_array.indexOf(connections[id].industry) == -1) {
 				industry_array.push(connections[id].industry);
@@ -60,7 +60,7 @@ function setConnections(connections, metadata) {
 
 		// add users data..
 		total_countrywise_connections.push(user_array);
-		
+
 		// add industry names data
 		total_conutrywise_industry_name_arr.push(industry_array);
 	}
@@ -71,10 +71,10 @@ function setConnections(connections, metadata) {
 
 				//total_countrywise_connections["in"] = users array having country is India.. Noted
 				total_countrywise_connections[country_name_arr[index]] = total_countrywise_connections[i];
-				
+
 				//total_conutrywise_industry_name_arr["in"] = industry names array of India.. Noted
 				total_conutrywise_industry_name_arr[country_name_arr[index]] = total_conutrywise_industry_name_arr[i];
-				
+
 				// free up memory
 				delete total_countrywise_connections[i];
 			}
@@ -86,7 +86,9 @@ function setConnections(connections, metadata) {
 	global_total_countrywise_connections = total_countrywise_connections;
 	global_country_name_arr = country_name_arr;
 	global_total_conutrywise_industry_name_arr = total_conutrywise_industry_name_arr;
-	
+
+	// console.log(total_conutrywise_industry_name_arr["in"]);
+
 	// getIndustrywiseConnections(global_total_countrywise_connections["in"], total_conutrywise_industry_name_arr["in"]);
 
 	initialize(global_connections, global_total_countrywise_connections, global_country_name_arr);
@@ -100,47 +102,56 @@ function setConnections(connections, metadata) {
  * @author VSPLC
  * @param {Object} total_countrywise_connections
  * @param {Object} industry_name_arr
- * 
- * @return {Object} 
+ *
+ * @return {Object}
  */
 function getIndustrywiseConnections(total_countrywise_connections, industry_name_arr) {
 
 	var total_industrywise_connections = [];
-
-	var tempConnections = total_countrywise_connections;
+	var m_industry_name_arr = [];
 	
-	console.log(total_countrywise_connections);
-	console.log(industry_name_arr);
+	// var tempConnections = total_countrywise_connections;
+
+	// console.log(total_countrywise_connections.length);
+	// console.log(industry_name_arr);
 
 	// if (industry_name_arr.indexOf(connections[id].industry) == -1) {
-		// industry_name_arr.push(connections[id].industry);
+	// industry_name_arr.push(connections[id].industry);
 	// }
 
 	for (var index = 0; index < industry_name_arr.length; ++index) {
 
 		var user_array = [];
 
-		for (var i = 0; i < tempConnections.length; i++) {
-			var member = tempConnections[i];
+		for (var i = 0; i < total_countrywise_connections.length; i++) {
+			
+			var member = total_countrywise_connections[i];
 			if (member.industry == industry_name_arr[index]) {
 				user_array.push(member);
 			}
 
 		}
 
-		// add users data..
-		total_industrywise_connections.push(user_array);
+		if (user_array.length > 0) {
+			// add users data..
+			total_industrywise_connections.push(user_array);
+			m_industry_name_arr.push(industry_name_arr[index]);
+			
+		}else{
+			console.log("There is no connections available.");			
+		}
+
 	}
 
 	// console.log(total_industrywise_connections);
 
-	for (var index = 0; index < industry_name_arr.length; ++index) {
+	for (var index = 0; index < m_industry_name_arr.length; ++index) {
 		for (var i = 0; i < total_industrywise_connections.length; ++i) {
 
 			if (index == i) {
 
-				//total_countrywise_connections["in"] = users array having country is India.. Noted
-				total_industrywise_connections[industry_name_arr[index]] = total_industrywise_connections[i];
+				//total_industrywise_connections["in"] = industrywise users array having country is India.. Noted
+				total_industrywise_connections[m_industry_name_arr[index]] = total_industrywise_connections[i];
 
 				// free up memory
 				delete total_industrywise_connections[i];
@@ -149,7 +160,11 @@ function getIndustrywiseConnections(total_countrywise_connections, industry_name
 		}
 	}
 
+	console.log(total_industrywise_connections.length);
 	console.log(total_industrywise_connections);
+	
+	return total_industrywise_connections.length;
+
 }
 
 /**
