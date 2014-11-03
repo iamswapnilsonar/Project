@@ -1,6 +1,7 @@
 /**
  * Get linkedin response and parse it country/city wise, also build the global variables for access it throughtly.
  * @author VSPLC
+ * 
  * @param {Object} connections
  * @param {Object} metadata
  */
@@ -100,6 +101,7 @@ function setConnections(connections, metadata) {
 /**
  * Get industry wise linkedin users.
  * @author VSPLC
+ * 
  * @param {Object} total_countrywise_connections
  * @param {Object} industry_name_arr
  *
