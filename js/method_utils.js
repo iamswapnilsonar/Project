@@ -432,11 +432,10 @@ helper.arr = {
 			var x = is_numeric ? a[columns[index]] : a[columns[index]].toLowerCase();
 			var y = is_numeric ? b[columns[index]] : b[columns[index]].toLowerCase();
 
-			/*if (!is_numeric) {
-			 x = helper.string.to_ascii(a[columns[index]].toLowerCase(), -1),
-			 y = helper.string.to_ascii(b[columns[index]].toLowerCase(), -1);
+			if (!is_numeric) {
+				x = helper.string.to_ascii(a[columns[index]].toLowerCase(), -1), y = helper.string.to_ascii(b[columns[index]].toLowerCase(), -1);
 
-			 }*/
+			}
 
 			if (x < y) {
 				return direction == 0 ? -1 : 1;
@@ -454,3 +453,44 @@ helper.arr = {
 		});
 	}
 };
+
+function createGeoChartDialogText(connections, arr_industries) {
+
+	var sorted_sector_arr = getIndustrywiseConnections(connections, arr_industries);
+	console.log(sorted_sector_arr.length);
+
+	var tooltip_text = "Connections : " + connections.length + "\nIndustry : " + sorted_sector_arr.length;
+	// +"\n"+sorted_sector_arr[0].industryName + " = " + sorted_sector_arr[0].connectionCount;
+
+	for (var index = 0; index < sorted_sector_arr.length; index++) {
+
+		if (index <= 2) {
+			tooltip_text += "\n";
+			var sector = sorted_sector_arr[index];
+			console.log(sector);
+			var str = sector.industryName + " = " + sector.connectionCount;
+			tooltip_text += str;
+		} else {
+			//NOP
+			var other_count = 0;
+
+			for (var j = 3; j < sorted_sector_arr.length; j++) {
+				var sector = sorted_sector_arr[j];
+				console.log(sector);
+				other_count += sector.connectionCount;
+			};
+
+			tooltip_text += "\n";
+			var str = "Other = " + other_count;
+			tooltip_text += str;
+
+			break;
+		}
+
+	};
+
+	// var tableDataRow = [stateProvienceCode, arr_statewise_connections[arr_province[i]].length, number];
+	// tableStateColumn.push(tableDataRow);
+	console.log(tooltip_text);
+	return tooltip_text;
+}
