@@ -1,7 +1,7 @@
 /**
  * Get linkedin response and parse it country/city wise, also build the global variables for access it throughtly.
  * @author VSPLC
- * 
+ *
  * @param {Object} connections
  * @param {Object} metadata
  */
@@ -101,7 +101,7 @@ function setConnections(connections, metadata) {
 /**
  * Get industry wise linkedin users.
  * @author VSPLC
- * 
+ *
  * @param {Object} total_countrywise_connections
  * @param {Object} industry_name_arr
  *
@@ -109,12 +109,13 @@ function setConnections(connections, metadata) {
  */
 function getIndustrywiseConnections(total_countrywise_connections, industry_name_arr) {
 
-	var total_industrywise_connections = [];
+	// var total_industrywise_connections = [];
 	var m_industry_name_arr = [];
+	var sector_arr = [];
 	
 	// var tempConnections = total_countrywise_connections;
 
-	// console.log(total_countrywise_connections.length);
+	console.log(total_countrywise_connections.length);
 	// console.log(industry_name_arr);
 
 	// if (industry_name_arr.indexOf(connections[id].industry) == -1) {
@@ -126,7 +127,7 @@ function getIndustrywiseConnections(total_countrywise_connections, industry_name
 		var user_array = [];
 
 		for (var i = 0; i < total_countrywise_connections.length; i++) {
-			
+
 			var member = total_countrywise_connections[i];
 			if (member.industry == industry_name_arr[index]) {
 				user_array.push(member);
@@ -136,18 +137,29 @@ function getIndustrywiseConnections(total_countrywise_connections, industry_name
 
 		if (user_array.length > 0) {
 			// add users data..
-			total_industrywise_connections.push(user_array);
-			m_industry_name_arr.push(industry_name_arr[index]);
 			
-		}else{
-			console.log("There is no connections available.");			
+			// total_industrywise_connections.push(user_array);
+			// m_industry_name_arr.push(industry_name_arr[index]);
+
+			/*var sector = {
+				iname : industry_name_arr[index],
+				connections : user_array,
+				con_count : user_array.length
+			};*/
+			
+			var sector = new Industry(industry_name_arr[index], user_array, user_array.length);
+			sector_arr.push(sector); 
+			//console.log(sector);
+
+		} else {
+			console.log("There is no connections available.");
 		}
 
 	}
 
 	// console.log(total_industrywise_connections);
 
-	for (var index = 0; index < m_industry_name_arr.length; ++index) {
+	/*for (var index = 0; index < m_industry_name_arr.length; ++index) {
 		for (var i = 0; i < total_industrywise_connections.length; ++i) {
 
 			if (index == i) {
@@ -160,12 +172,15 @@ function getIndustrywiseConnections(total_countrywise_connections, industry_name
 			}
 
 		}
-	}
+	}*/
 
-	console.log(total_industrywise_connections.length);
-	console.log(total_industrywise_connections);
-	
-	return total_industrywise_connections.length;
+	// console.log(total_industrywise_connections.length);
+	// console.log(total_industrywise_connections);
+
+	var sorted_sector_arr = helper.arr.multisort(sector_arr, ['connectionCount'], ['DESC']);
+ 	console.log(sorted_sector_arr);
+
+	return sorted_sector_arr;
 
 }
 
