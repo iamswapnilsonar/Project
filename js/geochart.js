@@ -7,6 +7,18 @@ function drawMap() {
 
 	var tableColumn = [["Country", 'Connections', "Industry"]];
 
+	var data = new google.visualization.DataTable();
+
+	data.addColumn('string', 'Country');
+	// Country name
+	data.addColumn('number', 'Connections');
+	// Connections
+	data.addColumn({
+		type : 'string',
+		role : 'tooltip'
+	});
+	//
+
 	// Add country name and its linkedin users
 	for (var i = 0; i < global_country_name_arr.length; i++) {
 
@@ -16,12 +28,43 @@ function drawMap() {
 		var mCountry = global_country_name_arr[i].toUpperCase();
 		var mConnections = global_total_countrywise_connections[global_country_name_arr[i]];
 		var mIndustries = global_total_conutrywise_industry_name_arr[global_country_name_arr[i]];
-		
-		var tableRow = [mCountry, mConnections.length, mIndustries.length];
-		tableColumn.push(tableRow);
+
+		// var tableRow = [mCountry, mConnections.length, mIndustries.length];
+		// tableColumn.push(tableRow);
+
+		/*var sorted_sector_arr_country = getIndustrywiseConnections(mConnections, mIndustries);
+		console.log(sorted_sector_arr_country.length);
+
+		var tooltip_text_country = "Connections : " + mConnections.length + "\nIndustry : " + sorted_sector_arr_country.length;
+		// +"\n"+sorted_sector_arr[0].industryName + " = " + sorted_sector_arr[0].connectionCount;
+
+		for (var index = 0; index < sorted_sector_arr_country.length; index++) {
+
+			if (index <= 3) {
+				tooltip_text_country += "\n";
+				var sector = sorted_sector_arr_country[index];
+				console.log(sector);
+				var str = sector.industryName + " = " + sector.connectionCount;
+				tooltip_text_country += str;
+			} else {
+				//NOP
+				break;
+			}
+
+		};
+
+		// var tableDataRow = [stateProvienceCode, arr_statewise_connections[arr_province[i]].length, number];
+		// tableStateColumn.push(tableDataRow);
+		console.log(tooltip_text_country);*/
+
+		var tooltip_text_country = createGeoChartDialogText(mConnections, mIndustries);
+
+		var arr = [mCountry, mConnections.length, tooltip_text_country];
+		data.addRow(arr);
+
 	};
 
-	var data = google.visualization.arrayToDataTable(tableColumn);
+	// var data = google.visualization.arrayToDataTable(tableColumn);
 
 	var options = {
 		displayMode : 'regions',
@@ -47,7 +90,7 @@ function drawMap() {
 		var selection = chart.getSelection();
 
 		if (selection.length == 1) {
-			
+
 			var selectedRow = selection[0].row;
 			selectedRegion = data.getValue(selectedRow, 0);
 			// console.log("City : "+ selectedRegion);
@@ -55,7 +98,7 @@ function drawMap() {
 
 			var cities = getCityNamesFromCountry(global_connections, selectedRegion.toLowerCase());
 
-			var tableStateColumn = [["Country", 'Connections', "Industry"]];
+			// var tableStateColumn = [["Country", 'Connections', "Industry"]];
 
 			var arr_province = [];
 
@@ -193,22 +236,71 @@ function drawMap() {
 
 			// console.log(arr_statewise_connections);
 
+			var provinceData = new google.visualization.DataTable();
+
+			provinceData.addColumn('string', 'Country');
+			// Country name
+			provinceData.addColumn('number', 'Connections');
+			// Connections
+			provinceData.addColumn({
+				type : 'string',
+				role : 'tooltip'
+			});
+			//
+
 			//End Code for make array of states accoding to the cities
 
 			for (var i = 0; i < arr_province.length; i++) {
 
 				var stateProvienceCode = selectedRegion + "-" + arr_province[i];
 
-				// console.log(stateProvienceCode);
+				/*// console.log(stateProvienceCode);
 
-				var number = getIndustrywiseConnections(arr_statewise_connections[arr_province[i]], global_total_conutrywise_industry_name_arr[selectedRegion.toLowerCase()]);
+				 var sorted_sector_arr = getIndustrywiseConnections(arr_statewise_connections[arr_province[i]], global_total_conutrywise_industry_name_arr[selectedRegion.toLowerCase()]);
+				 console.log(sorted_sector_arr.length);
 
-				var tableDataRow = [stateProvienceCode, arr_statewise_connections[arr_province[i]].length, number];
-				tableStateColumn.push(tableDataRow);
+				 var tooltip_text = "Connections : " + arr_statewise_connections[arr_province[i]].length + "\nIndustry : " + sorted_sector_arr.length;
+				 // +"\n"+sorted_sector_arr[0].industryName + " = " + sorted_sector_arr[0].connectionCount;
+
+				 for (var index = 0; index < sorted_sector_arr.length; index++) {
+
+				 if (index <= 2) {
+				 tooltip_text += "\n";
+				 var sector = sorted_sector_arr[index];
+				 console.log(sector);
+				 var str = sector.industryName + " = " + sector.connectionCount;
+				 tooltip_text += str;
+				 } else {
+				 //NOP
+				 var other_count = 0;
+
+				 for (var j = 3; j < sorted_sector_arr.length; j++) {
+				 var sector = sorted_sector_arr[j];
+				 console.log(sector);
+				 other_count += sector.connectionCount;
+				 };
+
+				 tooltip_text += "\n";
+				 var str = "Other = " + other_count;
+				 tooltip_text += str;
+
+				 break;
+				 }
+
+				 };
+
+				 // var tableDataRow = [stateProvienceCode, arr_statewise_connections[arr_province[i]].length, number];
+				 // tableStateColumn.push(tableDataRow);
+				 console.log(tooltip_text);*/
+
+				var tooltip_text = createGeoChartDialogText(arr_statewise_connections[arr_province[i]], global_total_conutrywise_industry_name_arr[selectedRegion.toLowerCase()]);
+
+				var arr = [stateProvienceCode, arr_statewise_connections[arr_province[i]].length, tooltip_text];
+				provinceData.addRow(arr);
 
 			};
 
-			var provinceData = google.visualization.arrayToDataTable(tableStateColumn);
+			// var provinceData = google.visualization.arrayToDataTable(tableStateColumn);
 
 			var provinceOptions = {
 				displayMode : 'regions',

@@ -1,100 +1,72 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-"http://www.w3.org/TR/html4/loose.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 	<head>
+		<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+		<script type='text/javascript'>
+google.load('visualization', '1', {
+'packages' : ['geochart']
+});
+google.setOnLoadCallback(drawMarkersMap);
+function drawMarkersMap() {
+var table = new google.visualization.DataTable();
+table.addColumn('number', 'LATITUDE', 'Latitude');
+table.addColumn('number', 'LONGITUDE', 'Longitude');
+table.addColumn('string', 'DESCRIPTION', 'Description');
+table.addColumn('number', 'VALUE', 'Music Consumers');
+table.addColumn('number', 'VALUE2', 'Music');
+var rows = [[23.651445, 72.755254, "Albany-Schenectady-Troy NY", 100, 101]];
 
-		<!-- Google Map intialization-->
-		<script type="text/javascript">
+table.addRows(rows);
+
+var data = new google.visualization.DataTable();
+data.addColumn('string', 'Country'); // Implicit domain label col.
+data.addColumn('number', 'Value'); // Implicit series 1 data col.
+data.addColumn({type:'string', role:'tooltip'}); //
+
+data.addRow(
+["US",1,"21% of Visits \n Swapnil Sonar = 100 \n Ashwini = 00 \n Rahul Sir = 35"]
+);
+
+var country = ["US", "GB", "IN", "RU"];
+
+for (var i=0; i < country.length; i++) {
+	var arr = [country[i], 1, "Industry : 200 \n Computer Software = 100 \n Manufacturing = 300 \n IT = 200"];	
+	data.addRow(arr);
+};
+
+var options = {
+// region : 'IN',
+
+// resolution : 'provinces',
+// displayMode : 'markers',
+};
+
+/*var data = new google.visualization.DataTable();
+data.addColumn('string', 'Country'); // Implicit domain label col.
+data.addColumn('number', 'Connections'); // Implicit series 1 data col.
+data.addColumn('string', 'Industry'); //
+
+// var tableColumn = [["Country", 'Connections', "Industry"]];
+// var tableRow = ["IN", 100 , 101];
+
+// tableColumn.push(tableRow);
+
+data.addRows([
+
+["US",1,"21% of Visits \n Swapnil Sonar = 100 \n Ashwini = 00 \n Rahul Sir = 35"],
+["GB",2,"7% of visits"],
+["IN",11,"3% of visits"],
+["RU",12,"3% of visits"]
+
+]);*/
 		
-			if ( typeof helper == 'undefined') {
-				var helper = { };
-			}
+// var data = google.visualization.arrayToDataTable(tableColumn);
 
-			helper.arr = {
-				/**
-				 * Function to sort multidimensional array
-				 *
-				 * param {array} [arr] Source array
-				 * param {array} [columns] List of columns to sort
-				 * param {array} [order_by] List of directions (ASC, DESC)
-				 * returns {array}
-				 */
-				multisort : function(arr, columns, order_by) {
-					if ( typeof columns == 'undefined') {
-						columns = [];
-						for ( x = 0; x < arr[0].length; x++) {
-							columns.push(x);
-						}
-					}
-
-					if ( typeof order_by == 'undefined') {
-						order_by = [];
-						for ( x = 0; x < arr[0].length; x++) {
-							order_by.push('ASC');
-						}
-					}
-
-					function multisort_recursive(a, b, columns, order_by, index) {
-						var direction = order_by[index] == 'DESC' ? 1 : 0;
-
-						var is_numeric = !isNaN(a[columns[index]] - b[columns[index]]);
-
-						var x = is_numeric ? a[columns[index]] : a[columns[index]].toLowerCase();
-						var y = is_numeric ? b[columns[index]] : b[columns[index]].toLowerCase();
-
-						/*if (!is_numeric) {
-							x = helper.string.to_ascii(a[columns[index]].toLowerCase(), -1), 
-							y = helper.string.to_ascii(b[columns[index]].toLowerCase(), -1);
-							
-						}*/
-
-						if (x < y) {
-							return direction == 0 ? -1 : 1;
-						}
-
-						if (x == y) {
-							return columns.length - 1 > index ? multisort_recursive(a, b, columns, order_by, index + 1) : 0;
-						}
-
-						return direction == 0 ? 1 : -1;
-					}
-
-					return arr.sort(function(a, b) {
-						return multisort_recursive(a, b, columns, order_by, 0);
-					});
-				}
-			};
-
-			function onLinkedInconnection() {
-				var peoples = [{
-					name : 'Jean',
-					lastname : 'Rodrigues',
-					points : 30
-				}, {
-					name : 'Sara',
-					lastname : 'Hope',
-					points : 30
-				}, {
-					name : 'Igor',
-					lastname : 'Leroy',
-					points : 25
-				}, {
-					name : 'Joo',
-					lastname : 'Bar',
-					points : 55
-				}];
-
-				// sort this list by points, if points is equal, sort by name.
-				var ranking = helper.arr.multisort(peoples, ['name'], ['DESC']);
-
-				// alert(ranking);
-				console.log(ranking);
-			}
-
+var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+chart.draw(data, options);
+};
 		</script>
-
-		<body>
-
-			<input type="button" name="con" value="Connection" onclick="onLinkedInconnection()">
-		</body>
+	</head>
+	<body>
+		<div id="chart_div"></div>
+	</body>
 </html>
