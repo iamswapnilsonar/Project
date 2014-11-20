@@ -2,71 +2,107 @@
 	<head>
 		<script type='text/javascript' src='https://www.google.com/jsapi'></script>
 		<script type='text/javascript'>
-google.load('visualization', '1', {
-'packages' : ['geochart']
-});
-google.setOnLoadCallback(drawMarkersMap);
-function drawMarkersMap() {
-var table = new google.visualization.DataTable();
-table.addColumn('number', 'LATITUDE', 'Latitude');
-table.addColumn('number', 'LONGITUDE', 'Longitude');
-table.addColumn('string', 'DESCRIPTION', 'Description');
-table.addColumn('number', 'VALUE', 'Music Consumers');
-table.addColumn('number', 'VALUE2', 'Music');
-var rows = [[23.651445, 72.755254, "Albany-Schenectady-Troy NY", 100, 101]];
+			google.load('visualization', '1', {
+				'packages' : ['geochart']
+			});
+			google.setOnLoadCallback(drawMarkersMap);
+			function drawMarkersMap() {
+				var table = new google.visualization.DataTable();
+				table.addColumn('number', 'LATITUDE', 'Latitude');
+				table.addColumn('number', 'LONGITUDE', 'Longitude');
+				table.addColumn('string', 'DESCRIPTION', 'Description');
+				table.addColumn('number', 'VALUE', 'Music Consumers');
+				table.addColumn('number', 'VALUE2', 'Music');
+				var rows = [[23.651445, 72.755254, "Albany-Schenectady-Troy NY", 100, 101]];
 
-table.addRows(rows);
+				table.addRows(rows);
 
-var data = new google.visualization.DataTable();
-data.addColumn('string', 'Country'); // Implicit domain label col.
-data.addColumn('number', 'Value'); // Implicit series 1 data col.
-data.addColumn({type:'string', role:'tooltip'}); //
+				var data = new google.visualization.DataTable();
+				data.addColumn('string', 'Country');
+				// Implicit domain label col.
+				data.addColumn('number', 'Value');
+				// Implicit series 1 data col.
+				data.addColumn({
+					type : 'string',
+					role : 'tooltip'
+				});
+				//
 
-data.addRow(
-["US",1,"21% of Visits \n Swapnil Sonar = 100 \n Ashwini = 00 \n Rahul Sir = 35"]
-);
+				data.addRow(["US", 1, "21% of Visits \n Swapnil Sonar = 100 \n Ashwini = 00 \n Rahul Sir = 35"]);
 
-var country = ["US", "GB", "IN", "RU"];
+				var country = ["US", "GB", "IN", "RU"];
 
-for (var i=0; i < country.length; i++) {
-	var arr = [country[i], 1, "Industry : 200 \n Computer Software = 100 \n Manufacturing = 300 \n IT = 200"];	
-	data.addRow(arr);
-};
+				for (var i = 0; i < country.length; i++) {
+					var arr = [country[i], 1, "Industry : 200 \n Computer Software = 100 \n Manufacturing = 300 \n IT = 200"];
+					data.addRow(arr);
+				};
 
-var options = {
-// region : 'IN',
+				var options = {
+					// region : 'IN',
 
-// resolution : 'provinces',
-// displayMode : 'markers',
-};
+					// resolution : 'provinces',
+					// displayMode : 'markers',
+				};
 
-/*var data = new google.visualization.DataTable();
-data.addColumn('string', 'Country'); // Implicit domain label col.
-data.addColumn('number', 'Connections'); // Implicit series 1 data col.
-data.addColumn('string', 'Industry'); //
+				/*var data = new google.visualization.DataTable();
+				data.addColumn('string', 'Country'); // Implicit domain label col.
+				data.addColumn('number', 'Connections'); // Implicit series 1 data col.
+				data.addColumn('string', 'Industry'); //
 
-// var tableColumn = [["Country", 'Connections', "Industry"]];
-// var tableRow = ["IN", 100 , 101];
+				// var tableColumn = [["Country", 'Connections', "Industry"]];
+				// var tableRow = ["IN", 100 , 101];
 
-// tableColumn.push(tableRow);
+				// tableColumn.push(tableRow);
 
-data.addRows([
+				data.addRows([
 
-["US",1,"21% of Visits \n Swapnil Sonar = 100 \n Ashwini = 00 \n Rahul Sir = 35"],
-["GB",2,"7% of visits"],
-["IN",11,"3% of visits"],
-["RU",12,"3% of visits"]
+				["US",1,"21% of Visits \n Swapnil Sonar = 100 \n Ashwini = 00 \n Rahul Sir = 35"],
+				["GB",2,"7% of visits"],
+				["IN",11,"3% of visits"],
+				["RU",12,"3% of visits"]
 
-]);*/
-		
-// var data = google.visualization.arrayToDataTable(tableColumn);
+				]);*/
 
-var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
-chart.draw(data, options);
-};
+				// var data = google.visualization.arrayToDataTable(tableColumn);
+
+				var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+				// chart.draw(data, options);
+			};
+
+			var data = [{
+				data1 : 'foo',
+				data2 : 'bar',
+				something1 : 'spa',
+				something2 : 'arf'
+			}, {
+				data1 : 'is',
+				data2 : 'what',
+				something1 : 'my',
+				something2 : 'who'
+			}];
+
+			function test(data, prop) {
+				
+				for (var i = 0; i < data.length; i++) {
+					
+					if (data[i].data2 === prop) {						
+						return data[i];
+						break;
+					}
+
+				}
+			}
+
+			var ele = test(data, 'bar');
+			console.log(ele);
+			
+			var contryCode = ["AD","AR","AT","AU","AX","BD","BE","BG","BR","CA","CH","CZ","DE","DK","DO","DZ","ES","FI","FO","FR","GB","GF","GL","GP","GT","HR","HU","IN","IS","IT","JP","LI","LK","LT","LU","MC","MD","MK","MQ","MX","MY","NL","NO","NZ","PH","PK","PL","PM","PT","RE","RO","RU","SE","SI","SK","SM","TH","TR","US","VA","WF","YT","ZA","GR"];
+			console.log(contryCode.length);
+
 		</script>
 	</head>
 	<body>
 		<div id="chart_div"></div>
 	</body>
+</html>
 </html>
