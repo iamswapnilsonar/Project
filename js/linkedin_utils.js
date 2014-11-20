@@ -1,14 +1,11 @@
 /**
  * Get linkedin response and parse it country/city wise, also build the global variables for access it throughtly.
  * @author VSPLC
- *
- * @param {Object} connections
- * @param {Object} metadata
  */
 function setConnections(connections, metadata) {
 
 	var country_name_arr = [];
-	var total_conutrywise_industry_name_arr = [];
+	var arrCountryObjects = [];
 
 	for (id in connections) {
 
@@ -16,9 +13,11 @@ function setConnections(connections, metadata) {
 		if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo' || typeof connections[id].industry === 'undefined')
 			continue;
 
+		var capsCountryCode = connections[id].location.country.code.toUpperCase();
+
 		// prepare the array for country-codes
-		if (country_name_arr.indexOf(connections[id].location.country.code) == -1) {
-			country_name_arr.push(connections[id].location.country.code);
+		if (country_name_arr.indexOf(capsCountryCode) == -1) {
+			country_name_arr.push(capsCountryCode);
 		}
 
 	}
@@ -35,7 +34,9 @@ function setConnections(connections, metadata) {
 			if (connections[id].id == 'private' || connections[id].location.country.code == 'private' || connections[id].location.country.code == 'oo' || typeof connections[id].industry === 'undefined')
 				continue;
 
-			if (connections[id].location.country.code == country_name_arr[index]) {
+			var capsCountryCode = connections[id].location.country.code.toUpperCase();
+
+			if (capsCountryCode == country_name_arr[index]) {
 
 				// linkedin user
 				var user_info = {
@@ -43,9 +44,10 @@ function setConnections(connections, metadata) {
 					lname : connections[id].lastName,
 					id : connections[id].id,
 					location_name : connections[id].location.name,
-					location : connections[id].location.country.code,
+					location : capsCountryCode,
 					profile_url : connections[id].publicProfileUrl,
-					industry : connections[id].industry
+					industry : connections[id].industry,
+					picture_url : connections[id].pictureUrl
 				};
 
 				// linkedin users array
@@ -53,7 +55,7 @@ function setConnections(connections, metadata) {
 			}
 
 			// creating industry names array for specific country
-			if (connections[id].location.country.code == country_name_arr[index] && industry_array.indexOf(connections[id].industry) == -1) {
+			if (capsCountryCode == country_name_arr[index] && industry_array.indexOf(connections[id].industry) == -1) {
 				industry_array.push(connections[id].industry);
 			}
 
@@ -62,37 +64,21 @@ function setConnections(connections, metadata) {
 		// add users data..
 		total_countrywise_connections.push(user_array);
 
-		// add industry names data
-		total_conutrywise_industry_name_arr.push(industry_array);
+		// prepare country objects..
+		var countryObject = new Country(country_name_arr[index]);
+		countryObject.countryName = getCountryName(country_name_arr[index]);
+		countryObject.connections = user_array;
+		countryObject.industryNames = industry_array;
+		arrCountryObjects.push(countryObject);
+
 	}
 
-	for (var index = 0; index < country_name_arr.length; ++index) {
-		for (var i = 0; i < total_countrywise_connections.length; ++i) {
-			if (index == i) {
-
-				//total_countrywise_connections["in"] = users array having country is India.. Noted
-				total_countrywise_connections[country_name_arr[index]] = total_countrywise_connections[i];
-
-				//total_conutrywise_industry_name_arr["in"] = industry names array of India.. Noted
-				total_conutrywise_industry_name_arr[country_name_arr[index]] = total_conutrywise_industry_name_arr[i];
-
-				// free up memory
-				delete total_countrywise_connections[i];
-			}
-
-		}
-	}
-
-	global_connections = connections;
-	global_total_countrywise_connections = total_countrywise_connections;
 	global_country_name_arr = country_name_arr;
-	global_total_conutrywise_industry_name_arr = total_conutrywise_industry_name_arr;
 
-	// console.log(total_conutrywise_industry_name_arr["in"]);
+	global_arrCountryObjects = arrCountryObjects;
+	console.log(global_arrCountryObjects);
 
-	// getIndustrywiseConnections(global_total_countrywise_connections["in"], total_conutrywise_industry_name_arr["in"]);
-
-	initialize(global_connections, global_total_countrywise_connections, global_country_name_arr);
+	initialize(global_country_name_arr);
 	drawMap();
 }
 
@@ -101,31 +87,14 @@ function setConnections(connections, metadata) {
 /**
  * Get industry wise linkedin users.
  * @author VSPLC
- *
- * @param {Object} total_countrywise_connections
- * @param {Object} industry_name_arr
- *
- * @return {Object}
  */
 function getIndustrywiseConnections(total_countrywise_connections, industry_name_arr) {
 
-	// var total_industrywise_connections = [];
-	var m_industry_name_arr = [];
 	var sector_arr = [];
-	
-	// var tempConnections = total_countrywise_connections;
-
-	console.log(total_countrywise_connections.length);
-	// console.log(industry_name_arr);
-
-	// if (industry_name_arr.indexOf(connections[id].industry) == -1) {
-	// industry_name_arr.push(connections[id].industry);
-	// }
 
 	for (var index = 0; index < industry_name_arr.length; ++index) {
 
 		var user_array = [];
-
 		for (var i = 0; i < total_countrywise_connections.length; i++) {
 
 			var member = total_countrywise_connections[i];
@@ -137,18 +106,8 @@ function getIndustrywiseConnections(total_countrywise_connections, industry_name
 
 		if (user_array.length > 0) {
 			// add users data..
-			
-			// total_industrywise_connections.push(user_array);
-			// m_industry_name_arr.push(industry_name_arr[index]);
-
-			/*var sector = {
-				iname : industry_name_arr[index],
-				connections : user_array,
-				con_count : user_array.length
-			};*/
-			
 			var sector = new Industry(industry_name_arr[index], user_array, user_array.length);
-			sector_arr.push(sector); 
+			sector_arr.push(sector);
 			//console.log(sector);
 
 		} else {
@@ -157,83 +116,34 @@ function getIndustrywiseConnections(total_countrywise_connections, industry_name
 
 	}
 
-	// console.log(total_industrywise_connections);
-
-	/*for (var index = 0; index < m_industry_name_arr.length; ++index) {
-		for (var i = 0; i < total_industrywise_connections.length; ++i) {
-
-			if (index == i) {
-
-				//total_industrywise_connections["in"] = industrywise users array having country is India.. Noted
-				total_industrywise_connections[m_industry_name_arr[index]] = total_industrywise_connections[i];
-
-				// free up memory
-				delete total_industrywise_connections[i];
-			}
-
-		}
-	}*/
-
-	// console.log(total_industrywise_connections.length);
-	// console.log(total_industrywise_connections);
-
 	var sorted_sector_arr = helper.arr.multisort(sector_arr, ['connectionCount'], ['DESC']);
- 	console.log(sorted_sector_arr);
-
 	return sorted_sector_arr;
-
-}
-
-/**
- * Set all country markers according to linkedin connections
- */
-function setCountryMarkers() {
-	initialize(global_connections, global_total_countrywise_connections, global_country_name_arr);
-}
-
-/**
- * Set all city markers according to linkedin connections
- */
-function setCityMarkers() {
-	initializeForCities(global_connections, global_total_countrywise_connections, global_country_name_arr);
 }
 
 /**
  * Method used for plotting the citywise markers of linkedin users. Used as directly or by onclick of country marker.
  * @author VSPLC
- *
- * @param {Object} map
- * @param {Object} locations => custom location objects with properties of lat-lang, title etc
- * @param {Object} id => country code
- * @param {Object} cities =>
  */
-function setCityWiseMarkers(map, locations, id, cities) {
+function setCityWiseMarkers(map, locations, countryCode) {
+
+	var countryObject = getCountryObject(global_arrCountryObjects, countryCode);
+	var totalCities = countryObject.totalCities;
+	var connections = countryObject.connections;
 
 	var city_marker;
-	for ( i = 0; i < locations.length; i++) {
+
+	for (var i = 0; i < locations.length; i++) {
 
 		var location = locations[i];
-
-		var city_name = location.location_name;
-		var city_lat = location.latitude;
-		var city_lng = location.longitude;
-		var city = location.city_name;
-
-		city_position = new google.maps.LatLng(city_lat, city_lng);
+		city_position = new google.maps.LatLng(location.latitude, location.longitude);
 
 		var city_marker = new google.maps.Marker({
 			map : map,
-			title : city_name,
+			title : location.location_name,
 			position : city_position
 		});
 
-		console.log("id : " + id);
-		var position = getLocationCoordinate(id);
-		console.log("position : " + position.lat + " " + position.lng);
-
-		// map.setCenter();
-
-		var city_connections = getCitywiseConnctions(city, mFinalData[id]);
+		var city_connections = getCitywiseConnctions(location.city_name, connections);
 
 		var info_content = '<div id="test_pune"><b>' + city_marker.title + '= </b>' + city_connections.length + '</div>';
 		var city_infowindow = new google.maps.InfoWindow();
@@ -264,42 +174,102 @@ function setCityWiseMarkers(map, locations, id, cities) {
 /**
  * Method used for plotting the citywise markers of linkedin users. Used as directly or by onclick of country marker.
  * @author VSPLC
- *
- * @param {Object} connections
- * @param {Object} mFinalData => Total Country Wise Connections
- * @param {Object} id => country code
  */
-function getOnItemOnclick(connections, mFinalData, id) {
-	// $("#test_"+id).click(function() {
-	// alert(id+' : clicked');
-	// });
-	var locations = [];
-	var cities = [];
-	cities = getCityNamesFromCountry(connections, id);
+function getOnItemOnclick(countryCode) {
 
-	var mCountryName = id.toUpperCase();
+	/*$("#test_" + countryCode).click(function() {
+	alert(countryCode + ' : clicked');
+	});*/
+
+	// creating locations array for Google Map Markers
+	var locations = [];
+
+	// linkedin storing all countrycode in small letters so need to CAPITALISE
+	var mCountryName = countryCode;
 	var mFullCountryName = getCountryName(mCountryName);
 
-	var address;
-	for (var i = 0; i < cities.length; i++) {
-		address = cities[i] + "," + mFullCountryName;
-		var position = getLocationCoordinate(address);
+	var countryObject = getCountryObject(global_arrCountryObjects, mCountryName);
+	var totalCities = countryObject.totalCities;
 
-		if (position != null) {
-			var location = {
-				city_name : cities[i],
-				location_name : address,
-				latitude : position.lat,
-				longitude : position.lng,
-			};
+	// currently we are passing connections (specific to country and country name - small letter)
+	var cities = getCityNamesFromCountry(countryObject.connections, countryCode);
 
-			locations.push(location);
-		} else {
-			console.log("Geocode failed");
+	var arrCityObjects = [];
+
+	if (totalCities.length > 0) {
+
+		// City details already prepared.. We saved the webservice calls :-)
+		// So fetch saved details
+
+		for (var i = 0; i < cities.length; i++) {
+
+			var address = cities[i] + "," + mFullCountryName;
+
+			var city = getCityObject(totalCities, cities[i], mCountryName);
+			var position = city.position;
+
+			if (position != null) {
+
+				var location = {
+					city_name : cities[i],
+					location_name : address,
+					latitude : position.lat,
+					longitude : position.lng,
+				};
+
+				locations.push(location);
+
+			} else {
+				console.log("Geocode failed");
+			}
 		}
+
+	} else {
+
+		for (var i = 0; i < cities.length; i++) {
+
+			var mFullCountryName = getCountryName(mCountryName);
+			var address = cities[i] + "," + mFullCountryName;
+
+			var info = getProvienceCodeAndCoordinateOfLocation(address);
+			// console.log(info);
+
+			if (info.province_code === undefined || info.province_code === null || info.position === undefined || info.position === null) {
+
+				// Do once again call..
+				info = getProvienceCodeAndCoordinateOfLocation(address);
+				console.log(info);
+			}
+
+			var addComponent = info.province_code;
+
+			var cityObject = new City(cities[i], mCountryName, info.province_code, info.position);
+			arrCityObjects.push(cityObject);
+
+			var position = info.position;
+
+			if (position != null) {
+
+				var location = {
+					city_name : cities[i],
+					location_name : address,
+					latitude : position.lat,
+					longitude : position.lng,
+				};
+
+				locations.push(location);
+			} else {
+				console.log("Geocode failed");
+			}
+
+		}
+
+		// update the country array with cities information..
+		countryObject.totalCities = arrCityObjects;
+		console.log(global_arrCountryObjects);
 	}
 
-	setCityWiseMarkers(map, locations, id, cities);
+	setCityWiseMarkers(map, locations, countryCode);
 }
 
 /**
@@ -376,13 +346,13 @@ function getCityNamesFromCountry(connections, country_name) {
 
 	for (id in connections) {
 
-		if (connections[id].id == 'private' || connections[id].location.country.code == 'private')
+		if (connections[id].id == 'private' || connections[id].location == 'private')
 			continue;
 
-		if (connections[id].location.country.code == country_name) {
+		if (connections[id].location == country_name) {
 
 			//Remove the area word from the location name
-			var str = connections[id].location.name, re = /Area/g, result = [], match, last_idx = 0;
+			var str = connections[id].location_name, re = /Area/g, result = [], match, last_idx = 0;
 
 			while ( match = re.exec(str)) {
 				result.push(str.slice(last_idx, re.lastIndex - match[0].length), match[0]);
@@ -408,11 +378,6 @@ function getCityNamesFromCountry(connections, country_name) {
 /**
  * Get city wise linkedin connections
  * @author VSPLC
- *
- * @param {Object} city name
- * @param {Object} specific connections for country
- *
- * @return {Object} linkedin users array
  */
 function getCitywiseConnctions(city_name, total_country_connections) {
 
@@ -432,3 +397,76 @@ function getCitywiseConnctions(city_name, total_country_connections) {
 	};
 	return members_arr;
 }
+
+function sendLinkedinMessage(id, subject, message) {
+	
+	var BODY = {
+		"recipients" : {
+			"values" : [{
+				"person" : {
+					"_path" : "/people/" + id,
+				}
+			}]
+		},
+		"subject" : subject,
+		"body" : message,
+	};
+
+	IN.API.Raw("/people/~/mailbox").method("POST").body(JSON.stringify(BODY)).result(function sucess() {
+		
+		if($('#alertgeneric-panel').is(':visible')) {
+    		$('#alertgeneric-panel').hide();
+		}
+		
+		alert("Your message sent sucessfully..!!");
+	}).error(function error(e) {
+		
+		if($('#alertgeneric-panel').is(':visible')) {
+    		$('#alertgeneric-panel').hide();
+		}
+		
+		alert("Ooops..!! Message not Sent");
+	});
+};
+
+function sendLinkedinGroupMessage(arr_id, subject, message) {
+
+	var BODY = {
+		"recipients" : {
+			"values" : []
+		},
+		"subject" : subject,
+		"body" : message,
+	};
+
+	$.each(arr_id, function(index, value) {
+		BODY.recipients.values.push({
+			"person" : {
+				"_path" : "/people/" + value,
+			}
+		});
+	});
+
+	console.log(JSON.stringify(BODY));
+
+	IN.API.Raw("/people/~/mailbox").method("POST").body(JSON.stringify(BODY)).result(function sucess() {
+		
+		global_arr_message_id = [];
+		
+		if($('#alertgeneric-panel').is(':visible')) {
+    		$('#alertgeneric-panel').hide();
+		}
+		
+		alert("Your message sent sucessfully..!!");
+	}).error(function error(e) {
+		
+		global_arr_message_id = [];
+		
+		if($('#alertgeneric-panel').is(':visible')) {
+    		$('#alertgeneric-panel').hide();
+		}
+		
+		alert("Ooops..!! Message not Sent");
+	});
+
+};
