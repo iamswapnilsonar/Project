@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<!--  Created with the CoffeeCup HTML Editor 2008  -->
+	<!--           http://www.coffeecup.com/           -->
+	<!--        Brewed on 11/10/2014 2:58:30 PM        -->
+	<head>
+
+		<meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript">
+			function addTableToDiv() {
+
+				var html = '<table id="connectionTable">';				
+				html += '<tr><td> Swapnil </td></tr>';
+				html += '</table>';
+				$("#divResults").append(html);
+			}
+
+			function removeTableFormdiv() {
+
+				var tables = document.getElementsByTagName("TABLE");
+				for (var i = tables.length - 1; i >= 0; i -= 1) {
+
+					if (tables[i] && tables[i].id === 'connectionTable') {
+						tables[i].parentNode.removeChild(tables[i]);
+					}
+
+				}
+
+			}
+
+		</script>
+
+	</head>
+	<body>
+
+		<div style="padding:0px 0px 0px 0px;"><img src="http://www.geonames.org/flags/x/ir.gif" style="padding:5px 5px 5px 5px;width:25px;height:25px;vertical-align:middle" onclick="check()" id="flag_id"><span style="font-family: Arial; color: rgb(51, 51, 51);font-size:18px;font-weight: bold;">Iran, Islamic Republic Of</span>
+			<br/>
+			<table style="padding:0px 0px 0px 30px;">
+				<tr>
+					<td><a href="#" onclick="retriveConnections();"> Connections : </a></td><td>1</td>
+				</tr>
+				<tr>
+					<td><a href="#" onclick="showIndstriesNames();"> Industry : </a></td><td>1</td>
+				</tr>
+				<tr>
+					<td>
+					<input type="hidden" value="IR" name="country" id="country">
+					<a href="#" id="Computer Software" onclick="industry(this.id)">Computer Software : </a></td><td>1</td>
+				</tr>
+			</table>
+			<input type="button" value="states" onclick="check()"/>
+		</div>
+
+		<input type="button" value="add" onclick="addTableToDiv()"/>
+		<input type="button" value="remove" onclick="removeTableFormdiv()"/>
+		
+		<div id="divResults"></div>
+
+	</body>
+</html>
+
