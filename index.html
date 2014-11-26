@@ -100,7 +100,7 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 			var chart, width, height, resolution, selectedRegion;
 
 			// for state/provinces
-			var global_provinceOptions, global_provinceData;
+			var global_provinceData, global_provinceOptions;
 			// for countries
 			var global_data, global_options, global_users, global_metadata;
 			var isWorldGeochart, isStateChart;
@@ -110,19 +110,32 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 			// first draw GeoChart for country level data
 			function refreshGeoChart() {
 
-				$(".google-visualization-tooltip").hide();
+				// $(".google-visualization-tooltip").hide();
+				
+				if($(".google-visualization-tooltip").is(":visible")){
+					console.log("refreshGeoChart - Visible - Country");
+					console.log($('.google-visualization-tooltip input[id="country"]').val());
+					$(".google-visualization-tooltip").hide();
+					
+					// console.log($('#country').val(""));
+				}else{			
+					console.log("refreshGeoChart - Not Visible - Country");
+					console.log($('.google-visualization-tooltip input[id="country"]').val());
+					// console.log($('#country').val(""));
+				}
+				
 
 				document.getElementById('chart_div').style.display = 'block';
 				document.getElementById('connectionsDisplay').style.display = 'none';
+				// console.log($('#country').val(""));
+				// setConnections(global_users, global_metadata);
 
-				setConnections(global_users, global_metadata);
-
-				// if (isWorldGeochart == true) {
-				// chart.draw(global_data, global_options);
-				// } else {
-				// chart.draw(global_provinceData, global_provinceOptions);
-				// isWorldGeochart = true;
-				// }
+				if (isWorldGeochart == true) {
+					chart.draw(global_data, global_options);
+				} else {
+					chart.draw(global_provinceData, global_provinceOptions);
+					isWorldGeochart = true;
+				}
 
 			}
 
@@ -338,8 +351,8 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 				IN.API.Connections("me").fields("id", "firstName", "lastName", "pictureUrl", "publicProfileUrl", "threeCurrentPositions", "location:(name,country:(code))", "industry").result(function(result, metadata) {
 					// var data = JSON.parse(JSON.stringify(result));
 					console.log(JSON.stringify(result));
-					global_users = result.values;
-					global_metadata = metadata;
+					// global_users = result.values;
+					// global_metadata = metadata;
 					setConnections(result.values, metadata);
 				});
 
@@ -444,7 +457,8 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 			<input id="subject" type="text" />
 			<br/>
 			<label>Message</label>			<textarea id="message"></textarea>
-<br/>			<input id="btnSend" type="button" name="Send" value="Send" onclick="sendLinkedinGroupMessage(global_arr_message_id, $('#subject').val(), $('#message').val());"/>
+			<br/>
+			<input id="btnSend" type="button" name="Send" value="Send" onclick="sendLinkedinGroupMessage(global_arr_message_id, $('#subject').val(), $('#message').val());"/>
 			<input id="btnCancel" type="button" name="Cancel" value="Cancel" onclick="function(){$('#alertgeneric-panel').hide();}"/>
 		</div>
 	</body>

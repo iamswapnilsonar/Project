@@ -263,72 +263,159 @@ function removeTableFormdiv() {
 
 }
 
-function industry(id) {
+function industry(industryName, countryOrProvince) {
 
-	$('#connectionsDisplay').scrollView();
+	$('#connectionTable').scrollView();
 
-	// var countryName = $('#country').val();
-	//alert(id + " " + countryName);
+	// 1 for country and 0 for province
+	if (countryOrProvince === 1) {
 
-	document.getElementById('connectionsDisplay').style.display = 'block';
-	document.getElementById('chart_div').style.display = 'none';
+		global_arr_message_id = [];
+		removeTableFormdiv();
 
-	var countryName = $('#country').val();
-	var provinceCode = $('#province').val();
-	var countryObject = getCountryObject(global_arrCountryObjects, countryName);
+		var countryName;
 
-	var mConnections = [];
-
-	var sorted_sector_arr = getIndustrywiseConnections(countryObject.connections, countryObject.industryNames);
-	console.log(sorted_sector_arr);
-
-	for (var i = 0; i < sorted_sector_arr.length; i++) {
-
-		if (sorted_sector_arr[i].industryName === id) {
-			mConnections = sorted_sector_arr[i].connections;
-			break;
+		var selection = chart.getSelection();
+		if (selection.length == 1) {
+			var selectedRow = selection[0].row;
+			countryName = global_data.getValue(selectedRow, 0);
 		}
 
-	}
-
-	console.log(mConnections);
-
-	removeTableFormdiv();
-
-	var html = '<table id="connectionTable">';
-	html += '<tr><td><b>Country :-' + getCountryName(countryName); +'</b></td></tr>  ';
-
-	if (provinceCode != undefined) {
-		html += '<tr><td><b>Province:-' + provinceCode + '</b></td></tr>  ';
-	}
-
-	html += '<tr><td><b>Industry Type :-' + id + '</b></td></tr>  ';
-
-	html += '<tr><th>Name</th><th>Location</th></tr>  ';
-	for (var j = 0; j < mConnections.length; j++) {
-		// var row = table.insertRow(j);
-		// var linkedinUser = row.insertCell(0);
-		// var ProfileUrl = row.insertCell(1);
-
-		// linkedinUser.innerHTML = mConnections[j].fname + " " + mConnections[j].lname;
-		// ProfileUrl.innerHTML = '<a href="' + mConnections[j].profile_url + '"  target="_blank">View Profile</a>';
-
-		html += '<tr>';
-		if (mConnections[j].picture_url === undefined) {
-			html += '<td><img src="/VSPL_LK_Prototype/Project/images/photo.png" style="padding:0px 5px 5px 5px;width:50px;height:50px;vertical-align:middle">';
+		if ($(".google-visualization-tooltip").is(":visible")) {
+			$(".google-visualization-tooltip").hide();
 		} else {
-			html += '<td><img src="' + mConnections[j].picture_url + '" style="padding:0px 5px 5px 5px;width:50px;height:50px;vertical-align:middle">';
+			// NOP
 		}
-		html += '<a href="' + mConnections[j].profile_url + '"  target="_blank">' + mConnections[j].fname + " " + mConnections[j].lname + '</a></td>';
-		html += '<td>' + mConnections[j].location_name + '</td>';
-		//html += '<td>' + mConnections[j].industry +'</td>';
-		//html += '<td><a href="' + mConnections[j].profile_url + '"  target="_blank">View Profile</a></td>';
-		html += '</tr>';
+
+		console.log(countryName);
+
+		document.getElementById('connectionsDisplay').style.display = 'block';
+		document.getElementById('chart_div').style.display = 'none';
+
+		var countryObject = getCountryObject(global_arrCountryObjects, countryName);
+		console.log(countryName);
+
+		var mConnections = [];
+
+		var sorted_sector_arr = getIndustrywiseConnections(countryObject.connections, countryObject.industryNames);
+		console.log(sorted_sector_arr);
+
+		for (var i = 0; i < sorted_sector_arr.length; i++) {
+
+			if (sorted_sector_arr[i].industryName === industryName) {
+				mConnections = sorted_sector_arr[i].connections;
+				break;
+			}
+
+		}
+
+		console.log(mConnections);
+
+		var html = '<table id="connectionTable">';
+		html += '<tr><td><b>Country :-' + getCountryName(countryName) + '</b></td></tr>  ';
+		html += '<tr><td><input type="button" value="Send Group Message" onclick="displayAlertMsg();"></td></tr>';
+		html += '<tr><td><b>Name</b></td><td><b>Location</b></td><td><b>Industry</b></td></tr>  ';
+		for (var j = 0; j < mConnections.length; j++) {
+
+			html += '<tr>';
+			html += '<td><input type="checkbox" name="check" id="' + mConnections[j].id + '" value="' + mConnections[j].id + '" onclick="checkchange(this.id);"></td>';
+			if (mConnections[j].picture_url === undefined) {
+				html += '<td><img src="/VSPL_LK_Prototype/Project/images/photo.png" style="padding:0px 5px 5px 5px;width:50px;height:50px;vertical-align:middle">';
+			} else {
+				html += '<td><img src="' + mConnections[j].picture_url + '" style="padding:0px 5px 5px 5px;width:50px;height:50px;vertical-align:middle">';
+			}
+			html += '<a href="' + mConnections[j].profile_url + '"  target="_blank">' + mConnections[j].fname + " " + mConnections[j].lname + '</a></td>';
+
+			html += '<td>' + mConnections[j].location_name + '</td>';
+			html += '<td>' + mConnections[j].industry + '</td>';
+			html += '<td><input type="button" id="' + mConnections[j].id + '" value="Send Message" onclick="addToGlobalMessages(this.id);"></td>';
+			//html += '<td><a href="' + mConnections[j].profile_url + '"  target="_blank">View Profile</a></td>';
+			html += '</tr>';
+
+		}
+
+		html += '</table>';
+		$("#connectionsDisplay").append(html);
+
+	} else {
+
+		isWorldGeochart = false;
+		console.log(isWorldGeochart);
+
+		global_arr_message_id = [];
+		removeTableFormdiv();
+
+		var selection = chart.getSelection();
+		var arrayOfCodes = [];
+
+		if (selection.length == 1) {
+			var selectedRow = selection[0].row;
+			var tempString = global_provinceData.getValue(selectedRow, 0);
+			console.log(tempString);
+			arrayOfCodes = tempString.split("-");
+		}
+
+		var countryCode = arrayOfCodes[0];
+		var provinceCode = arrayOfCodes[1];
+
+		if ($(".google-visualization-tooltip").is(":visible")) {
+			$(".google-visualization-tooltip").hide();
+		} else {
+			// NOP
+		}
+
+		document.getElementById('connectionsDisplay').style.display = 'block';
+		document.getElementById('chart_div').style.display = 'none';
+
+		var mConnections = [];
+		
+		var countryObject = getCountryObject(global_arrCountryObjects, countryCode);
+		
+		// var countryObject = getCountryObject(global_arrCountryObjects, countryName);
+		var tempConnections = getLinkedinConnectionsFormProvince(countryCode, provinceCode);
+
+		var sorted_sector_arr = getIndustrywiseConnections(tempConnections, countryObject.industryNames);
+		console.log(sorted_sector_arr);
+
+		for (var i = 0; i < sorted_sector_arr.length; i++) {
+
+			if (sorted_sector_arr[i].industryName === industryName) {
+				mConnections = sorted_sector_arr[i].connections;
+				break;
+			}
+
+		}
+
+		console.log(mConnections);
+
+		var html = '<table id="connectionTable">';
+		html += '<tr><td><b>Country :-' + getCountryName(countryCode) + '</b></td></tr>  ';
+		html += '<tr><td><b>Province:-' + provinceCode + '</b></td></tr>  ';
+		html += '<tr><td><input type="button" value="Send Group Message" onclick="displayAlertMsg();"></td></tr>';
+		html += '<tr><td><b>Name</b></td><td><b>Location</b></td><td><b>Industry</b></td></tr>  ';
+		for (var j = 0; j < mConnections.length; j++) {
+
+			html += '<tr>';
+			html += '<td><input type="checkbox" name="check" id="' + mConnections[j].id + '" value="' + mConnections[j].id + '" onclick="checkchange(this.id);"></td>';
+			if (mConnections[j].picture_url === undefined) {
+				html += '<td><img src="/VSPL_LK_Prototype/Project/images/photo.png" style="padding:0px 5px 5px 5px;width:50px;height:50px;vertical-align:middle">';
+			} else {
+				html += '<td><img src="' + mConnections[j].picture_url + '" style="padding:0px 5px 5px 5px;width:50px;height:50px;vertical-align:middle">';
+			}
+			html += '<a href="' + mConnections[j].profile_url + '"  target="_blank">' + mConnections[j].fname + " " + mConnections[j].lname + '</a></td>';
+
+			html += '<td>' + mConnections[j].location_name + '</td>';
+			html += '<td>' + mConnections[j].industry + '</td>';
+			html += '<td><input type="button" id="' + mConnections[j].id + '" value="Send Message" onclick="addToGlobalMessages(this.id);"></td>';
+			//html += '<td><a href="' + mConnections[j].profile_url + '"  target="_blank">View Profile</a></td>';
+			html += '</tr>';
+
+		}
+
+		html += '</table>';
+		$("#connectionsDisplay").append(html);
 
 	}
-
-	html += '</table>';
-	$("#connectionsDisplay").append(html);
 
 }
 
@@ -374,8 +461,8 @@ function addToGlobalMessages(id) {
 		displayAlertMsg();
 	} else {
 		alert("You are trying to send message to more than one people. Please use Group Message feature. ");
-		for(var i=0; i< global_arr_message_id.length; i++){
-			$("#" + global_arr_message_id[i]).attr("checked", false);			
+		for (var i = 0; i < global_arr_message_id.length; i++) {
+			$("#" + global_arr_message_id[i]).attr("checked", false);
 		}
 		global_arr_message_id = [];
 		console.log(global_arr_message_id);
@@ -393,10 +480,28 @@ function retriveConnections(id) {
 
 		removeTableFormdiv();
 
+		// var countryName = $('.google-visualization-tooltip input[id="country"]').val();
+		// console.log(countryName);
+
+		var countryName;
+
+		var selection = chart.getSelection();
+		if (selection.length == 1) {
+			var selectedRow = selection[0].row;
+			countryName = global_data.getValue(selectedRow, 0);
+		}
+
+		if ($(".google-visualization-tooltip").is(":visible")) {
+			$(".google-visualization-tooltip").hide();
+		} else {
+			// NOP
+		}
+
+		console.log(countryName);
+
 		document.getElementById('connectionsDisplay').style.display = 'block';
 		document.getElementById('chart_div').style.display = 'none';
 
-		var countryName = $('#country').val();
 		var countryObject = getCountryObject(global_arrCountryObjects, countryName);
 		var mConnections = countryObject.connections;
 
@@ -430,15 +535,33 @@ function retriveConnections(id) {
 
 	} else {
 
-		global_arr_message_id = [];
+		isWorldGeochart = false;
+		console.log(isWorldGeochart);
 
+		global_arr_message_id = [];
 		removeTableFormdiv();
+
+		var selection = chart.getSelection();
+		var arrayOfCodes = [];
+
+		if (selection.length == 1) {
+			var selectedRow = selection[0].row;
+			var tempString = global_provinceData.getValue(selectedRow, 0);
+			console.log(tempString);
+			arrayOfCodes = tempString.split("-");
+		}
+
+		var countryCode = arrayOfCodes[0];
+		var provinceCode = arrayOfCodes[1];
+
+		if ($(".google-visualization-tooltip").is(":visible")) {
+			$(".google-visualization-tooltip").hide();
+		} else {
+			// NOP
+		}
 
 		document.getElementById('connectionsDisplay').style.display = 'block';
 		document.getElementById('chart_div').style.display = 'none';
-
-		var countryCode = $('#country').val();
-		var provinceCode = $('#province').val();
 
 		// var countryObject = getCountryObject(global_arrCountryObjects, countryName);
 		var mConnections = getLinkedinConnectionsFormProvince(countryCode, provinceCode);
@@ -485,50 +608,114 @@ function showIndstriesNames(industryOrOther, countryOrProvince) {
 	document.getElementById('connectionsDisplay').style.display = 'block';
 	document.getElementById('chart_div').style.display = 'none';
 
-	var countryName = $('#country').val();
-	var provinceCode = $('#province').val();
+	// var countryName = $('#country').val();
+	// var provinceCode = $('#province').val();
 
-	var countryObject = getCountryObject(global_arrCountryObjects, countryName);
-	var mIndustryNames = countryObject.industryNames;
-	var mConnections;
+	var countryName, provinceCode;
+
+	var selection = chart.getSelection();
 
 	if (countryOrProvince === 0) {
-		mConnections = countryObject.connections;
-		// mIndustryNames = countryObject.industryNames;
-	} else {
-		mConnections = getLinkedinConnectionsFormProvince(countryName, provinceCode);
-	}
 
-	console.log(mConnections);
-	console.log(mIndustryNames);
+		if (selection.length == 1) {
+			var selectedRow = selection[0].row;
+			var tempString = global_data.getValue(selectedRow, 0);
+			console.log(tempString);
+			var arrayOfCodes = tempString.split("-");
+			countryName = arrayOfCodes[0];
+		}
 
-	var sorted_sector_arr = getIndustrywiseConnections(mConnections, mIndustryNames);
-	console.log(sorted_sector_arr);
+		console.log(countryName);
 
-	var html = '<table id="connectionTable">';
-	html += '<tr>';
-	html += '<td><input type="hidden"  value="' + countryName + '" name="country" id="country"></td>';
-	html += '</tr>';
+		var countryObject = getCountryObject(global_arrCountryObjects, countryName);
+		var mIndustryNames = countryObject.industryNames;
+		var mConnections = countryObject.connections;
 
-	var index;
+		console.log(mConnections);
+		console.log(mIndustryNames);
 
-	if (industryOrOther === 0) {
-		index = 0;
-	} else {
-		index = 3;
-	}
+		var sorted_sector_arr = getIndustrywiseConnections(mConnections, mIndustryNames);
+		console.log(sorted_sector_arr);
 
-	for (var i = index; i < sorted_sector_arr.length; i++) {
-
+		var html = '<table id="connectionTable">';
 		html += '<tr>';
-		// html += '<td><input type="hidden"  value="' + countryName + '" name="country" id="country"></td>';
-		html += '<td><a href="#" id="' + sorted_sector_arr[i].industryName + '" onclick="industry(this.id)">' + sorted_sector_arr[i].industryName + '</a></td>';
-		html += '<td>' + sorted_sector_arr[i].connectionCount + '</td>';
+		html += '<td><input type="hidden"  value="' + countryName + '" name="country" id="country"></td>';
 		html += '</tr>';
-	}
 
-	html += '</table>';
-	$("#connectionsDisplay").append(html);
+		var index;
+
+		if (industryOrOther === 0) {
+			index = 0;
+		} else {
+			index = 3;
+		}
+
+		for (var i = index; i < sorted_sector_arr.length; i++) {
+			html += '<tr>';
+			// html += '<td><input type="hidden"  value="' + countryName + '" name="country" id="country"></td>';
+			html += '<td><a href="#" id="' + sorted_sector_arr[i].industryName + '" onclick="industry(this.id, 1)">' + sorted_sector_arr[i].industryName + '</a></td>';
+			html += '<td>' + sorted_sector_arr[i].connectionCount + '</td>';
+			html += '</tr>';
+		}
+
+		html += '</table>';
+		console.log(html);
+		$("#connectionsDisplay").append(html);
+
+	} else {
+
+		if (selection.length == 1) {
+
+			var selectedRow = selection[0].row;
+			var tempString = global_provinceData.getValue(selectedRow, 0);
+			console.log(tempString);
+			var arrayOfCodes = tempString.split("-");
+
+			countryName = arrayOfCodes[0];
+			provinceCode = arrayOfCodes[1];
+		}
+
+		console.log(countryName);
+		console.log(provinceCode);
+
+		var countryObject = getCountryObject(global_arrCountryObjects, countryName);
+		var mIndustryNames = countryObject.industryNames;
+		var mConnections = getLinkedinConnectionsFormProvince(countryName, provinceCode);
+
+		isWorldGeochart = false;
+		console.log(isWorldGeochart);
+
+		console.log(mConnections);
+		console.log(mIndustryNames);
+
+		var sorted_sector_arr = getIndustrywiseConnections(mConnections, mIndustryNames);
+		console.log(sorted_sector_arr);
+
+		var html = '<table id="connectionTable">';
+		html += '<tr>';
+		html += '<td><input type="hidden"  value="' + countryName + '" name="country" id="country"></td>';
+		html += '</tr>';
+
+		var index;
+
+		if (industryOrOther === 0) {
+			index = 0;
+		} else {
+			index = 3;
+		}
+
+		for (var i = index; i < sorted_sector_arr.length; i++) {
+			html += '<tr>';
+			// html += '<td><input type="hidden"  value="' + countryName + '" name="country" id="country"></td>';
+			html += '<td><a href="#" id="' + sorted_sector_arr[i].industryName + '" onclick="industry(this.id, 0)">' + sorted_sector_arr[i].industryName + '</a></td>';
+			html += '<td>' + sorted_sector_arr[i].connectionCount + '</td>';
+			html += '</tr>';
+		}
+
+		html += '</table>';
+		console.log(html);
+		$("#connectionsDisplay").append(html);
+	}
 
 }
 
@@ -565,9 +752,10 @@ function getLinkedinConnectionsFormProvince(countryCode, provinceCode) {
 }
 
 function check() {
+
 	isWorldGeochart = false;
-	//isStateChart=true;
 	console.log(isWorldGeochart);
+
 	$(".google-visualization-tooltip").hide();
 
 	var selection = chart.getSelection();
@@ -846,6 +1034,8 @@ function createGeoChartDialogText(connections, arr_industries, mCountry) {
 	var mFullCountryName = getCountryName(mCountry);
 	console.log(mCountry);
 
+	var mProvince;
+
 	var image_link = "http://www.geonames.org/flags/x/" + mCountry.toLowerCase() + ".gif";
 	console.log(image_link);
 
@@ -870,7 +1060,7 @@ function createGeoChartDialogText(connections, arr_industries, mCountry) {
 			tooltip_text += '<tr>';
 			tooltip_text += '<td>';
 			// tooltip_text += '<input type="hidden"  value="' + mCountry + '" name="country" id="country">';
-			tooltip_text += '<a href="#" id="' + sorted_sector_arr[index].industryName + '" onclick="industry(this.id)">' + sorted_sector_arr[index].industryName + " : " + '</a>';
+			tooltip_text += '<a href="#" id="' + sorted_sector_arr[index].industryName + '" onclick="industry(this.id, 1)">' + sorted_sector_arr[index].industryName + " : " + '</a>';
 			tooltip_text += '</td>';
 			tooltip_text += '<td>' + sorted_sector_arr[index].connectionCount + '</td>';
 			tooltip_text += '</tr>';
@@ -940,7 +1130,7 @@ function createGeoChartDialogTextForProvince(connections, arr_industries, mCount
 			tooltip_text += '<td>';
 			// tooltip_text += '<input type="hidden"  value="' + mCountry + '" name="country" id="country">';
 			// tooltip_text += '<input type="hidden"  value="' + mProvince + '" name="province" id="province">';
-			tooltip_text += '<a href="#" id="' + sorted_sector_arr[index].industryName + '" onclick="industry(this.id)">' + sorted_sector_arr[index].industryName + " : " + '</a>';
+			tooltip_text += '<a href="#" id="' + sorted_sector_arr[index].industryName + '" onclick="industry(this.id, 0)">' + sorted_sector_arr[index].industryName + " : " + '</a>';
 			tooltip_text += '</td>';
 			tooltip_text += '<td>' + sorted_sector_arr[index].connectionCount + '</td>';
 			tooltip_text += '</tr>';

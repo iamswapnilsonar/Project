@@ -2,17 +2,32 @@
 	<head>
 
 		<script type="text/javascript">
-			function demo(a) {
-				alert(a);
-				/*if(a.checked) {
-				 //Do stuff
-				 alert(a);
-				 }*/
+			function splitString() {
+				var stringToSplit = "US";
+				var arrayOfStrings = stringToSplit.split("-");
+				console.log(arrayOfStrings);
+
+				var string = "";
+				var Swapnil="sssssssss";
+				for (var i = 0; i < 5; i++) {
+					string += '<a href="#" id="addition" onclick="add(swap,5)">Click</a><br/>';
+				}
+				console.log(string);
+				document.getElementById('temp').innerHTML = string;
+				return arrayOfStrings;
 			}
+
+			function add(a, b) {
+				console.log(a);
+			}
+
 		</script>
 
 	</head>
 	<body>
-		<input type="checkbox" id="c" value="Swapnil" onchange='demo(this.id);'/>
+		<input type="button" id="button" value="Split" onclick="splitString()"/>
+
+		<div id="temp"></div>
+
 	</body>
 </html>

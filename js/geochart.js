@@ -3,9 +3,11 @@
  * @author VSPLC
  */
 function drawMap() {
+	
 	// set your data and options
 	isWorldGeochart = true;
 	console.log(isWorldGeochart);
+	
 	var tableColumn = [["Country", 'Connections', "Industry"]];
 
 	var data = new google.visualization.DataTable();
