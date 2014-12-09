@@ -67,13 +67,13 @@
 			}
 		</style>
 
-		<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+		<script type='text/javascript' src='http://www.google.com/jsapi'></script>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
 		<script type="text/javascript" src="http://www.santarosa.edu/~jperetz/projects/lib/prettify/prettify.js"></script>
 
 		<script src="http://maps.googleapis.com/maps/api/js?v=3.exp"></script>
 
-		<script type="text/javascript" src="http://platform.linkedin.com/in.js">
+		<script type="text/javascript" src="http://platform.linkedin.com/in.js" >
 api_key: 752f7e023f5cet
 Secret_Key:8hEIlinuKm6NElKu
 OAuth_User_Token:d85dac7f-2152-464c-a4cd-fce0090c2643
@@ -111,19 +111,18 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 			function refreshGeoChart() {
 
 				// $(".google-visualization-tooltip").hide();
-				
-				if($(".google-visualization-tooltip").is(":visible")){
+
+				if ($(".google-visualization-tooltip").is(":visible")) {
 					console.log("refreshGeoChart - Visible - Country");
 					console.log($('.google-visualization-tooltip input[id="country"]').val());
 					$(".google-visualization-tooltip").hide();
-					
+
 					// console.log($('#country').val(""));
-				}else{			
+				} else {
 					console.log("refreshGeoChart - Not Visible - Country");
 					console.log($('.google-visualization-tooltip input[id="country"]').val());
 					// console.log($('#country').val(""));
 				}
-				
 
 				document.getElementById('chart_div').style.display = 'block';
 				document.getElementById('connectionsDisplay').style.display = 'none';
@@ -358,6 +357,10 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 
 			}
 
+			function loginToLinkedin() {
+				IN.UI.Authorize().place();
+			}
+
 		</script>
 		<!-- End of Linkedin Stuff -->
 
@@ -371,6 +374,8 @@ scope: w_messages rw_company_admin r_emailaddress r_network r_basicprofile rw_gr
 		</p>
 
 		<script type="IN/Login"></script>
+
+		<!--<input type="button" id="login" value="Login" onclick="loginToLinkedin()" />-->
 
 		<div id="sendMessageForm"></div>
 
